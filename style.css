@@ -17,6 +17,20 @@ body {
   margin: 0 20px;
 }
 
+/* Print button styling */
+#print {
+  margin-left: 20px;
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+#print:hover {
+  background: #ddd;
+}
+
 .card-container {
   text-align: center;
   margin: 10px auto 20px auto;
@@ -34,10 +48,10 @@ body {
 
 /* Cards once placed in the calendar */
 .calendar .assignment {
-  font-weight: normal;   /* lose the bold inside days */
-  padding: 2px 6px;      /* slimmer padding */
-  margin: 2px 0;         /* tighter spacing */
-  font-size: 0.85em;     /* slightly smaller text */
+  font-weight: normal;
+  padding: 2px 6px;
+  margin: 2px 0;
+  font-size: 0.85em;
   border-radius: 4px;
   display: inline-block;
 }
@@ -77,21 +91,31 @@ body {
   color: #aaa;
 }
 
+/* Weekday headers row */
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   max-width: 900px;
-  margin: 0 auto 4px auto;
+  margin: 0 auto;
   text-align: center;
   font-weight: bold;
+  border-collapse: collapse;
 }
 
+.weekday-row div {
+  border: 1px solid #ccc;
+  padding: 6px 0;
+  background: #f5f5f5;
+  box-sizing: border-box;
+}
+
+/* Calendar grid */
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
   max-width: 900px;
   margin: 0 auto;
+  border-collapse: collapse;
 }
 
 .day {
@@ -99,6 +123,7 @@ body {
   min-height: 100px;
   padding: 4px;
   position: relative;
+  box-sizing: border-box;
 }
 
 .day-number {
@@ -107,8 +132,8 @@ body {
 
 /* Softer holiday styling */
 .holiday {
-  background: #f9f9f9;          /* soft gray background */
-  border: 1px dashed #bbb;      /* subtle dashed border */
+  background: #f9f9f9;
+  border: 1px dashed #bbb;
 }
 
 .holiday-label {
@@ -126,7 +151,14 @@ body {
     cursor: default;
   }
   .card-container,
-  .nav {
+  .nav button { /* hide only the buttons */
     display: none;
+  }
+  #title {
+    display: block;
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-size: 2.2em;
   }
 }
