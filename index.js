@@ -3,9 +3,23 @@ const title = document.getElementById('title');
 const prevBtn = document.getElementById('prev');
 const nextBtn = document.getElementById('next');
 const weekdayRow = document.getElementById('weekday-row');
+const printBtn = document.getElementById('print');
 
 let currentMonth = new Date().getMonth() + 1;
 let currentYear = new Date().getFullYear();
+let sheetData = {}; // will hold JSON from your Google Sheet
+
+// === Load Google Sheets JSON ===
+async function loadSheetData() {
+  try {
+    const res = await fetch("https://script.google.com/macros/s/AKfycbxV45YA-n3bQ_CNJYYBxZAhgcdhSt4W7YMKbpgor9gKxNkk9ElEz2NED1N-tZcBogo/exec");
+    sheetData = await res.json();
+    console.log("Loaded sheetData:", sheetData);
+  } catch (err) {
+    console.error("Error loading sheet data", err);
+    sheetData = {};
+  }
+}
 
 // === LocalStorage helpers ===
 function saveState() {
@@ -30,7 +44,7 @@ function loadState() {
   return raw ? JSON.parse(raw) : {};
 }
 
-// === Holiday calculation helpers ===
+// === Holiday helpers ===
 function nthWeekday(year, month, weekday, n) {
   let date = new Date(year, month, 1);
   let count = 0;
@@ -93,10 +107,9 @@ function makeCard(person, dateKey, isNote, text="") {
 
   if (isNote) {
     div.contentEditable = true;
-    div.onblur = () => saveState(); // save when editing finishes
+    div.onblur = () => saveState();
   }
 
-  // Double‑click removes only this card
   div.ondblclick = e => {
     e.stopPropagation();
     div.remove();
@@ -140,7 +153,37 @@ function buildCalendar(month, year) {
       cell.appendChild(label);
     }
 
-    // Restore saved state
+    // === Reference notes from Sheets ===
+    if (sheetData[dateKey]) {
+      const { aaronWorking, kristinWorking, aaronNightBefore, coverage } = sheetData[dateKey];
+
+      if (kristinWorking === "No") {
+        const note = document.createElement("div");
+        note.className = "ref-note";
+        note.textContent = "K-Off";
+        cell.appendChild(note);
+      }
+
+      if (aaronWorking === "Yes") {
+        const note = document.createElement("div");
+        note.className = "ref-note";
+        note.textContent = "A-Days";
+        cell.appendChild(note);
+      }
+
+      if (aaronNightBefore === "Yes") {
+        const note = document.createElement("div");
+        note.className = "ref-note";
+        note.textContent = "A-Nights";
+        cell.appendChild(note);
+      }
+
+      if (coverage === "Yes") {
+        cell.classList.add("coverage-needed");
+      }
+    }
+
+    // Restore saved state (manual overrides)
     if (saved[dateKey]) {
       saved[dateKey].forEach(c => {
         const isNote = c.person === "Note";
@@ -184,21 +227,30 @@ document.querySelectorAll('.card-container .assignment').forEach(card => {
 // Navigation
 prevBtn.onclick = () => {
   currentMonth--;
-  if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+  if (currentMonth < 1) {
+    currentMonth = 12;
+    currentYear--;
+  }
   buildCalendar(currentMonth, currentYear);
 };
+
 nextBtn.onclick = () => {
   currentMonth++;
-  if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+  if (currentMonth > 12) {
+    currentMonth = 1;
+    currentYear++;
+  }
   buildCalendar(currentMonth, currentYear);
 };
 
 // Print button
-const printBtn = document.getElementById('print');
 printBtn.onclick = () => {
   window.print();
 };
 
-// Init
-buildWeekdayHeaders();
-buildCalendar(currentMonth, currentYear);
+// === Initialize ===
+(async function init() {
+  await loadSheetData();       // fetch your Sheets JSON
+  buildWeekdayHeaders();       // build Sun–Sat headers
+  buildCalendar(currentMonth, currentYear); // build the month grid
+})();
