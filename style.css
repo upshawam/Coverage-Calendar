@@ -143,6 +143,21 @@ body {
   display: block;
 }
 
+/* Reference notes (K-Off, A-Days, A-Nights) */
+.ref-note {
+  font-size: 0.7em;
+  color: #555;
+  margin-top: 4px;
+  display: block;
+  text-align: left;
+}
+
+/* Coverage highlight */
+.coverage-needed {
+  border: 2px solid #ff9800;   /* orange highlight */
+  background: #fff3e0;         /* soft orange background */
+}
+
 @media print {
   body {
     background: white;
@@ -157,7 +172,7 @@ body {
   #title {
     display: block;
     text-align: center;
-    margin-top: 25px;
+    margin-top: 25px;     /* extra space from top of page */
     margin-bottom: 15px;
     font-size: 2.2em;
   }
