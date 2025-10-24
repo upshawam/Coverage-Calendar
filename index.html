@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coverage Calendar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="nav">
+    <button id="prev">◀ Prev</button>
+    <span id="title"></span>
+    <button id="next">Next ▶</button>
+  </div>
+
+  <div class="card-container" id="tray">
+    <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
+    <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
+    <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
+  </div>
+
+  <div class="weekday-row" id="weekday-row"></div>
+  <div class="calendar" id="calendar"></div>
+
+  <script src="index.js"></script>
+</body>
+</html>
