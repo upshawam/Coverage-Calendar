@@ -193,6 +193,12 @@ nextBtn.onclick = () => {
   buildCalendar(currentMonth, currentYear);
 };
 
+// Print button
+const printBtn = document.getElementById('print');
+printBtn.onclick = () => {
+  window.print();
+};
+
 // Init
 buildWeekdayHeaders();
 buildCalendar(currentMonth, currentYear);
