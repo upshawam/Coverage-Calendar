@@ -1,0 +1,132 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.nav {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#title {
+  font-size: 2.5em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0 20px;
+}
+
+.card-container {
+  text-align: center;
+  margin: 10px auto 20px auto;
+}
+
+/* Tray cards (palette at the top) */
+.card-container .assignment {
+  margin: 0 10px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: grab;
+  display: inline-block;
+  font-weight: bold; /* tray cards stay bold */
+}
+
+/* Cards once placed in the calendar */
+.calendar .assignment {
+  font-weight: normal;   /* lose the bold inside days */
+  padding: 2px 6px;      /* slimmer padding */
+  margin: 2px 0;         /* tighter spacing */
+  font-size: 0.85em;     /* slightly smaller text */
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.nonnie {
+  background: #c8e6c9;
+}
+
+.sophia {
+  background: #bbdefb;
+}
+
+.note-card {
+  background: #fff9c4;
+  border: 1px solid #f0e68c;
+}
+
+/* When dropped and editable */
+.assignment.note-card[contenteditable="true"] {
+  background: #fff9c4;
+  border: 1px solid #f0e68c;
+  min-height: 24px;
+  min-width: 60px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: text;
+  font-size: 0.85em;
+  color: #333;
+  display: inline-block;
+  white-space: pre-wrap;
+  font-weight: normal;
+}
+
+/* Show faint label when empty */
+.assignment.note-card[contenteditable="true"]:empty:before {
+  content: "Note";
+  color: #aaa;
+}
+
+.weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  max-width: 900px;
+  margin: 0 auto 4px auto;
+  text-align: center;
+  font-weight: bold;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.day {
+  border: 1px solid #ccc;
+  min-height: 100px;
+  padding: 4px;
+  position: relative;
+}
+
+.day-number {
+  font-weight: bold;
+}
+
+/* Softer holiday styling */
+.holiday {
+  background: #f9f9f9;          /* soft gray background */
+  border: 1px dashed #bbb;      /* subtle dashed border */
+}
+
+.holiday-label {
+  font-size: 0.75em;
+  color: #666;
+  margin-top: 2px;
+  display: block;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .assignment {
+    cursor: default;
+  }
+  .card-container,
+  .nav {
+    display: none;
+  }
+}
