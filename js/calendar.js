@@ -36,6 +36,7 @@ export function buildCalendar(year, month, shiftData) {
   for (let day = 1; day <= numDays; day++) {
     const cell = document.createElement("div");
     cell.className = "day";
+
     const num = document.createElement("div");
     num.className = "day-number";
     num.textContent = day;
@@ -45,22 +46,17 @@ export function buildCalendar(year, month, shiftData) {
     const shifts = shiftData[dateKey];
 
     if (shifts && shifts.length > 0) {
+      const shiftContainer = document.createElement("div");
+      shiftContainer.className = "shift-container";
+
       shifts.forEach(shift => {
-        const note = document.createElement("div");
-        note.className = "ref-note";
-
-        // Color coding by person/label
-        if (shift.person === "Aaron" && shift.label === "A-Days") {
-          note.classList.add("nonnie");
-        } else if (shift.person === "Aaron" && shift.label === "A-Nights") {
-          note.classList.add("nonnie"); // you can add a separate CSS class if you want nights distinct
-        } else if (shift.person === "Kristin") {
-          note.classList.add("sophia");
-        }
-
-        note.textContent = shift.label;
-        cell.appendChild(note);
+        const label = document.createElement("div");
+        label.className = "shift-label";
+        label.textContent = shift.label; // A-Days / A-Nights / K-Work
+        shiftContainer.appendChild(label);
       });
+
+      cell.appendChild(shiftContainer);
     }
 
     calendarEl.appendChild(cell);
