@@ -2,32 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Coverage Calendar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>Shift Calendar</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="nav">
-    <button id="prev">◀ Prev</button>
-    <span id="title"></span>
-    <button id="next">Next ▶</button>
-    <button id="print">🖨 Print</button>
-  </header>
+  <!-- Loading overlay (hidden by default, shown during fetch) -->
+  <div id="loading-overlay">Loading latest schedule…</div>
 
-  <!-- Card tray for drag/drop or tap-to-assign -->
+  <!-- Navigation / title -->
+  <div class="nav">
+    <button id="prev">Prev</button>
+    <span id="title"></span>
+    <button id="next">Next</button>
+    <button id="print">Print</button>
+  </div>
+
+  <!-- Tray of assignment cards -->
   <div class="card-container" id="tray">
-    <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
-    <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
-    <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
+    <div class="assignment nonnie" data-person="Nonnie">Nonnie</div>
+    <div class="assignment sophia" data-person="Sophia">Sophia</div>
+    <div class="assignment" data-person="Note">Note</div>
   </div>
 
   <!-- Weekday headers -->
   <div class="weekday-row" id="weekday-row"></div>
 
   <!-- Calendar grid -->
-  <main class="calendar" id="calendar"></main>
+  <div class="calendar" id="calendar"></div>
 
-  <!-- Load entry point as a module -->
-  <script type="module" src="js/main.js"></script>
+  <!-- Scripts -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
