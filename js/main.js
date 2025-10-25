@@ -4,10 +4,11 @@ import { fetchShiftData } from './data.js';
 import { formatDateKey } from './utils.js';
 
 const today = new Date();
-const year = today.getFullYear();
-const month = today.getMonth();
+let currentYear = today.getFullYear();
+let currentMonth = today.getMonth();
 
 const overlay = document.getElementById("loading-overlay");
+const titleEl = document.getElementById("title");
 
 /* -----------------------------
    Persistence helpers
@@ -54,6 +55,10 @@ function updateNoteText(dateKey, oldText, newText) {
 ------------------------------ */
 function buildCalendar(year, month, shiftData) {
   originalBuildCalendar(year, month, shiftData);
+
+  // Update title
+  const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
+  titleEl.textContent = `${monthName} ${year}`;
 
   // Reapply saved custom assignments
   const custom = loadCustomAssignments();
@@ -149,8 +154,8 @@ function enableDayDropZones() {
 
 function formatDateKeyFromCell(dayCell) {
   const dayNum = dayCell.querySelector(".day-number").textContent;
-  const y = year;
-  const m = String(month + 1).padStart(2, "0");
+  const y = currentYear;
+  const m = String(currentMonth + 1).padStart(2, "0");
   const d = String(dayNum).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
@@ -160,9 +165,9 @@ function formatDateKeyFromCell(dayCell) {
 ------------------------------ */
 const cached = localStorage.getItem("shiftData");
 if (cached) {
-  buildCalendar(year, month, JSON.parse(cached));
+  buildCalendar(currentYear, currentMonth, JSON.parse(cached));
 } else {
-  buildCalendar(year, month, {});
+  buildCalendar(currentYear, currentMonth, {});
 }
 
 overlay.style.display = "block";
@@ -171,9 +176,34 @@ fetchShiftData()
   .then(data => {
     if (data && Object.keys(data).length > 0) {
       localStorage.setItem("shiftData", JSON.stringify(data));
-      buildCalendar(year, month, data);
+      buildCalendar(currentYear, currentMonth, data);
     }
   })
   .finally(() => {
     overlay.style.display = "none";
   });
+
+/* -----------------------------
+   Navigation + Print buttons
+------------------------------ */
+document.getElementById("prev").addEventListener("click", () => {
+  currentMonth--;
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+  buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
+});
+
+document.getElementById("next").addEventListener("click", () => {
+  currentMonth++;
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+  buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
+});
+
+document.getElementById("print").addEventListener("click", () => {
+  window.print();
+});
