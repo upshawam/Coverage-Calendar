@@ -84,20 +84,20 @@ body {
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
-  max-width: 100%;       /* prevent horizontal overflow */
+  max-width: 100%;       /* never overflow horizontally */
+  min-width: 60px;
+  min-height: 24px;
 }
 
 /* Editable notes */
 .assignment.note-card[contenteditable="true"] {
   cursor: text;
-  min-height: 24px;
-  min-width: 60px;
-  display: inline-block;
+  display: block;
   font-weight: normal;
   resize: vertical;       /* allow vertical resizing */
 }
 
-/* Placeholder text for empty note */
+/* Placeholder text when empty */
 .assignment.note-card[contenteditable="true"]:empty:before {
   content: "Note";
   color: #aaa;
