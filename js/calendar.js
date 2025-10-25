@@ -42,13 +42,17 @@ export function buildCalendar(year, month, shiftData) {
     cell.appendChild(num);
 
     const dateKey = formatDateKey(new Date(year, month, day));
-    if (shiftData[dateKey]) {
+
+    if (shiftData[dateKey] && shiftData[dateKey].length > 0) {
       shiftData[dateKey].forEach(shift => {
         const note = document.createElement("div");
         note.className = `ref-note ${shift.person.toLowerCase()}`;
         note.textContent = `${shift.person} (${shift.type}) ${shift.start}-${shift.end}`;
         cell.appendChild(note);
       });
+    } else {
+      // No shift data → highlight coverage needed
+      cell.classList.add("coverage-needed");
     }
 
     calendarEl.appendChild(cell);
