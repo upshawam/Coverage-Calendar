@@ -1,6 +1,7 @@
 // main.js
 import { buildCalendar as originalBuildCalendar } from './calendar.js';
 import { fetchShiftData } from './data.js';
+import { formatDateKey } from './utils.js';
 
 const today = new Date();
 const year = today.getFullYear();
@@ -8,7 +9,9 @@ const month = today.getMonth();
 
 const overlay = document.getElementById("loading-overlay");
 
-// --- Persistence helpers ---
+/* -----------------------------
+   Persistence helpers
+------------------------------ */
 function loadCustomAssignments() {
   return JSON.parse(localStorage.getItem("customAssignments") || "{}");
 }
@@ -17,21 +20,56 @@ function saveCustomAssignments(assignments) {
   localStorage.setItem("customAssignments", JSON.stringify(assignments));
 }
 
-// --- Calendar wrapper to reapply drops ---
+function addAssignment(dateKey, person, text = null) {
+  const custom = loadCustomAssignments();
+  if (!custom[dateKey]) custom[dateKey] = [];
+  custom[dateKey].push({ person, text });
+  saveCustomAssignments(custom);
+}
+
+function removeAssignment(dateKey, person, text) {
+  const custom = loadCustomAssignments();
+  if (custom[dateKey]) {
+    custom[dateKey] = custom[dateKey].filter(
+      a => !(a.person === person && a.text === text)
+    );
+    if (custom[dateKey].length === 0) delete custom[dateKey];
+    saveCustomAssignments(custom);
+  }
+}
+
+function updateNoteText(dateKey, oldText, newText) {
+  const custom = loadCustomAssignments();
+  if (custom[dateKey]) {
+    const note = custom[dateKey].find(a => a.person === "Note" && a.text === oldText);
+    if (note) {
+      note.text = newText;
+      saveCustomAssignments(custom);
+    }
+  }
+}
+
+/* -----------------------------
+   Calendar wrapper
+------------------------------ */
 function buildCalendar(year, month, shiftData) {
   originalBuildCalendar(year, month, shiftData);
 
   // Reapply saved custom assignments
   const custom = loadCustomAssignments();
-  Object.entries(custom).forEach(([dateKey, people]) => {
-    const dayCell = document.querySelector(
-      `.calendar .day:nth-child(${new Date(dateKey).getDate() + new Date(year, month, 1).getDay()})`
-    );
+  Object.entries(custom).forEach(([dateKey, items]) => {
+    const date = new Date(dateKey);
+    if (date.getMonth() !== month || date.getFullYear() !== year) return;
+
+    const dayCells = document.querySelectorAll(".calendar .day");
+    const dayCell = Array.from(dayCells).find(cell => {
+      const numEl = cell.querySelector(".day-number");
+      return numEl && parseInt(numEl.textContent, 10) === date.getDate();
+    });
+
     if (dayCell) {
-      people.forEach(person => {
-        const assignment = document.createElement("div");
-        assignment.className = "assignment";
-        assignment.textContent = person;
+      items.forEach(item => {
+        const assignment = createAssignmentElement(dateKey, item.person, item.text);
         dayCell.appendChild(assignment);
       });
     }
@@ -40,33 +78,44 @@ function buildCalendar(year, month, shiftData) {
   enableDayDropZones();
 }
 
-// --- Initial render from cache ---
-const cached = localStorage.getItem("shiftData");
-if (cached) {
-  buildCalendar(year, month, JSON.parse(cached));
-} else {
-  buildCalendar(year, month, {});
-}
+/* -----------------------------
+   Assignment element factory
+------------------------------ */
+function createAssignmentElement(dateKey, person, text = null) {
+  const assignment = document.createElement("div");
+  assignment.classList.add("assignment");
 
-// Show overlay during fetch
-overlay.style.display = "block";
+  if (person === "Nonnie") {
+    assignment.classList.add("nonnie");
+    assignment.textContent = "Nonnie";
+  } else if (person === "Sophia") {
+    assignment.classList.add("sophia");
+    assignment.textContent = "Sophia";
+  } else if (person === "Note") {
+    assignment.classList.add("note-card");
+    assignment.setAttribute("contenteditable", "true");
+    assignment.textContent = text || "Note";
 
-fetchShiftData()
-  .then(data => {
-    if (data && Object.keys(data).length > 0) {
-      localStorage.setItem("shiftData", JSON.stringify(data));
-      buildCalendar(year, month, data);
-    }
-  })
-  .finally(() => {
-    overlay.style.display = "none";
+    // Save edits
+    let oldText = assignment.textContent;
+    assignment.addEventListener("input", () => {
+      updateNoteText(dateKey, oldText, assignment.textContent);
+      oldText = assignment.textContent;
+    });
+  }
+
+  // Double-click removal
+  assignment.addEventListener("dblclick", () => {
+    assignment.remove();
+    removeAssignment(dateKey, person, assignment.textContent);
   });
+
+  return assignment;
+}
 
 /* -----------------------------
    Drag-and-drop functionality
 ------------------------------ */
-
-// Make tray cards draggable
 document.querySelectorAll(".card-container .assignment").forEach(card => {
   card.setAttribute("draggable", "true");
 
@@ -80,34 +129,24 @@ document.querySelectorAll(".card-container .assignment").forEach(card => {
   });
 });
 
-// Allow drops on calendar days
 function enableDayDropZones() {
   document.querySelectorAll(".calendar .day").forEach(day => {
-    day.addEventListener("dragover", e => {
-      e.preventDefault();
-    });
+    day.addEventListener("dragover", e => e.preventDefault());
 
     day.addEventListener("drop", e => {
       e.preventDefault();
       const person = e.dataTransfer.getData("text/plain");
-      if (person) {
-        const assignment = document.createElement("div");
-        assignment.className = "assignment";
-        assignment.textContent = person;
-        day.appendChild(assignment);
+      if (!person) return;
 
-        // Save to localStorage
-        const dateKey = formatDateKeyFromCell(day);
-        const custom = loadCustomAssignments();
-        if (!custom[dateKey]) custom[dateKey] = [];
-        custom[dateKey].push(person);
-        saveCustomAssignments(custom);
-      }
+      const dateKey = formatDateKeyFromCell(day);
+      const assignment = createAssignmentElement(dateKey, person, person === "Note" ? "Note" : null);
+      day.appendChild(assignment);
+
+      addAssignment(dateKey, person, assignment.textContent);
     });
   });
 }
 
-// Helper: infer dateKey from a day cell
 function formatDateKeyFromCell(dayCell) {
   const dayNum = dayCell.querySelector(".day-number").textContent;
   const y = year;
@@ -115,3 +154,26 @@ function formatDateKeyFromCell(dayCell) {
   const d = String(dayNum).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+/* -----------------------------
+   Initial render
+------------------------------ */
+const cached = localStorage.getItem("shiftData");
+if (cached) {
+  buildCalendar(year, month, JSON.parse(cached));
+} else {
+  buildCalendar(year, month, {});
+}
+
+overlay.style.display = "block";
+
+fetchShiftData()
+  .then(data => {
+    if (data && Object.keys(data).length > 0) {
+      localStorage.setItem("shiftData", JSON.stringify(data));
+      buildCalendar(year, month, data);
+    }
+  })
+  .finally(() => {
+    overlay.style.display = "none";
+  });
