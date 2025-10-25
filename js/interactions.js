@@ -56,8 +56,26 @@ function enableTapToAssign() {
 
 // --- Shared helper ---
 function addAssignment(day, person) {
-  const note = document.createElement('div');
-  note.className = `assignment ${person.toLowerCase()}`;
-  note.textContent = person;
-  day.appendChild(note);
+  // Toggle: if already present, remove it
+  const existing = day.querySelector(`.assignment.${person.toLowerCase()}`);
+  if (existing) {
+    existing.remove();
+    return;
+  }
+
+  // Special handling for Note
+  if (person === "Note") {
+    const note = document.createElement("div");
+    note.className = "assignment note-card";
+    note.contentEditable = "true";
+    note.textContent = ""; // start empty so placeholder shows
+    day.appendChild(note);
+    return;
+  }
+
+  // Default: Nonnie, Sophia, etc.
+  const pill = document.createElement("div");
+  pill.className = `assignment ${person.toLowerCase()}`;
+  pill.textContent = person;
+  day.appendChild(pill);
 }
