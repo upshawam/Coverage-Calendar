@@ -158,6 +158,21 @@ body {
   background: #fff3e0;         /* soft orange background */
 }
 
+/* Legend section */
+#legend {
+  max-width: 900px;
+  margin: 20px auto;
+  font-size: 0.9em;
+  color: #444;
+}
+#legend h3 {
+  margin-bottom: 0.5em;
+}
+#legend p {
+  margin: 4px 0;
+}
+
+/* Print styles */
 @media print {
   body {
     background: white;
@@ -175,5 +190,64 @@ body {
     margin-top: 25px;     /* extra space from top of page */
     margin-bottom: 15px;
     font-size: 2.2em;
+  }
+}
+
+/* === Mobile responsive styles === */
+@media (max-width: 600px) {
+  .calendar {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    margin: 0 10px;
+  }
+
+  .day {
+    min-height: auto;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+
+  .day-number {
+    font-size: 1rem;
+    margin-bottom: 2px;
+  }
+
+  .ref-note {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+  }
+
+  .weekday-row {
+    display: none; /* hide Sun–Sat row on mobile */
+  }
+
+  .card-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .assignment {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+  }
+
+  button {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    margin: 4px;
+  }
+
+  #title {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  #legend {
+    font-size: 0.8rem;
+    padding: 0 10px;
   }
 }
