@@ -72,25 +72,29 @@ body {
 .nonnie { background: #c8e6c9; }
 .sophia { background: #bbdefb; }
 
+/* Note pill styling (tray + dropped) */
 .note-card {
   background: #fff9c4;
   border: 1px solid #f0e68c;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.85em;
+  color: #333;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  max-width: 100%;       /* prevent horizontal overflow */
 }
 
 /* Editable notes */
 .assignment.note-card[contenteditable="true"] {
-  background: #fff9c4;
-  border: 1px solid #f0e68c;
+  cursor: text;
   min-height: 24px;
   min-width: 60px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  cursor: text;
-  font-size: 0.85em;
-  color: #333;
   display: inline-block;
-  white-space: pre-wrap;
   font-weight: normal;
+  resize: vertical;       /* allow vertical resizing */
 }
 
 /* Placeholder text for empty note */
