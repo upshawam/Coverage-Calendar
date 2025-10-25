@@ -29,3 +29,52 @@ fetchShiftData()
   .finally(() => {
     overlay.style.display = "none";
   });
+
+/* -----------------------------
+   Drag-and-drop functionality
+------------------------------ */
+
+// Make tray cards draggable
+document.querySelectorAll(".card-container .assignment").forEach(card => {
+  card.setAttribute("draggable", "true");
+
+  card.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("text/plain", card.dataset.person);
+    card.classList.add("active");
+  });
+
+  card.addEventListener("dragend", () => {
+    card.classList.remove("active");
+  });
+});
+
+// Allow drops on calendar days
+function enableDayDropZones() {
+  document.querySelectorAll(".calendar .day").forEach(day => {
+    day.addEventListener("dragover", e => {
+      e.preventDefault(); // allow drop
+    });
+
+    day.addEventListener("drop", e => {
+      e.preventDefault();
+      const person = e.dataTransfer.getData("text/plain");
+      if (person) {
+        const assignment = document.createElement("div");
+        assignment.className = "assignment";
+        assignment.textContent = person;
+        day.appendChild(assignment);
+      }
+    });
+  });
+}
+
+// Run once on load
+enableDayDropZones();
+
+// Re-run after calendar rebuilds
+// (Monkey-patch buildCalendar to re-enable drop zones)
+const originalBuildCalendar = buildCalendar;
+window.buildCalendar = function(year, month, data) {
+  originalBuildCalendar(year, month, data);
+  enableDayDropZones();
+};
