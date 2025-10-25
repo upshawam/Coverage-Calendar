@@ -136,7 +136,7 @@ body {
   font-weight: bold;
 }
 
-/* Weekend shading (stronger contrast) */
+/* Weekend shading */
 .day.weekend {
   background: #e6f0ff; /* light blue for weekends */
 }
@@ -183,7 +183,7 @@ body {
   text-align: left;
 }
 
-/* Coverage highlight (if you keep it) */
+/* Coverage highlight */
 .coverage-needed {
   border: 2px solid #ff9800;
   background: #fff3e0;
