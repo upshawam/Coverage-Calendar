@@ -7,6 +7,7 @@ export function enableInteractions(isTouchDevice) {
     enableTapToAssign();
   } else {
     enableDragAndDrop();
+    enableDoubleClickRemove(); // restore desktop double‑click removal
   }
 }
 
@@ -54,6 +55,19 @@ function enableTapToAssign() {
   });
 }
 
+// --- Double‑click remove (desktop only) ---
+function enableDoubleClickRemove() {
+  const days = document.querySelectorAll('.day');
+  days.forEach(day => {
+    day.addEventListener('dblclick', e => {
+      const target = e.target;
+      if (target.classList.contains('assignment')) {
+        target.remove();
+      }
+    });
+  });
+}
+
 // --- Shared helper ---
 function addAssignment(day, person) {
   // Toggle: if already present, remove it
@@ -68,7 +82,7 @@ function addAssignment(day, person) {
     const note = document.createElement("div");
     note.className = "assignment note-card";
     note.contentEditable = "true";
-    note.textContent = ""; // start empty so placeholder shows
+    note.textContent = "";
     day.appendChild(note);
     return;
   }
