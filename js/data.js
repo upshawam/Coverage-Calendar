@@ -1,11 +1,15 @@
 // data.js
 
-// Fetch shift data from JSON (local file or API)
+// Your published Google Apps Script endpoint
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbxV45YA-n3bQ_CNJYYBxZAhgcdhSt4W7YMKbpgor9gKxNkk9ElEz2NED1N-tZcBogo/exec";
+
 export async function fetchShiftData() {
   try {
-    const res = await fetch("shifts.json"); // or your Apps Script endpoint
+    const res = await fetch(SHEETS_URL);
     if (!res.ok) throw new Error("Failed to fetch shift data");
-    return await res.json();
+    const data = await res.json();
+    console.log("Fetched shift data:", data); // helpful for debugging
+    return data;
   } catch (err) {
     console.error("Error fetching data:", err);
     return {};
