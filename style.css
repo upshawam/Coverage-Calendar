@@ -158,20 +158,6 @@ body {
   background: #fff3e0;         /* soft orange background */
 }
 
-/* Legend section */
-#legend {
-  max-width: 900px;
-  margin: 20px auto;
-  font-size: 0.9em;
-  color: #444;
-}
-#legend h3 {
-  margin-bottom: 0.5em;
-}
-#legend p {
-  margin: 4px 0;
-}
-
 /* Print styles */
 @media print {
   body {
@@ -193,61 +179,46 @@ body {
   }
 }
 
-/* === Mobile responsive styles === */
+/* === Mini-Grid Mobile Responsive === */
 @media (max-width: 600px) {
   .calendar {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: repeat(7, 1fr); /* keep 7-day grid */
     max-width: 100%;
-    margin: 0 10px;
-  }
-
-  .day {
-    min-height: auto;
-    padding: 8px;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-  }
-
-  .day-number {
-    font-size: 1rem;
-    margin-bottom: 2px;
-  }
-
-  .ref-note {
-    font-size: 0.8rem;
-    padding: 2px 6px;
+    margin: 0 4px;
+    font-size: 0.7rem;
   }
 
   .weekday-row {
-    display: none; /* hide Sun–Sat row on mobile */
+    grid-template-columns: repeat(7, 1fr);
+    font-size: 0.7rem;
   }
 
-  .card-container {
-    flex-wrap: wrap;
-    gap: 8px;
+  .day {
+    min-height: 60px;
+    padding: 2px;
+  }
+
+  .day-number {
+    font-size: 0.8rem;
+  }
+
+  .ref-note {
+    font-size: 0.65rem;
   }
 
   .assignment {
-    font-size: 0.8rem;
-    padding: 4px 6px;
+    font-size: 0.7rem;
+    padding: 2px 4px;
   }
 
   button {
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    margin: 4px;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    margin: 2px;
   }
 
   #title {
-    font-size: 1.5rem;
-    margin-bottom: 8px;
-  }
-
-  #legend {
-    font-size: 0.8rem;
-    padding: 0 10px;
+    font-size: 1.2rem;
+    margin-bottom: 6px;
   }
 }
