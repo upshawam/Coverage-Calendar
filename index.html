@@ -14,7 +14,7 @@
     <button id="print">🖨 Print</button>
   </header>
 
-  <!-- Card tray for drag/drop -->
+  <!-- Card tray for drag/drop or tap-to-assign -->
   <div class="card-container" id="tray">
     <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
     <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
@@ -27,6 +27,7 @@
   <!-- Calendar grid -->
   <main class="calendar" id="calendar"></main>
 
-  <script src="index.js"></script>
+  <!-- Load entry point as a module -->
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
