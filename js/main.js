@@ -1,44 +1,30 @@
 // main.js
-import { fetchShiftData } from './data.js';
 import { buildCalendar } from './calendar.js';
-import { enableInteractions } from './interactions.js';
+import { fetchShiftData } from './data.js';
 
-let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth();
-let shiftData = {};
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth();
 
-async function init() {
-  shiftData = await fetchShiftData();
-  render();
+const overlay = document.getElementById("loading-overlay");
 
-  // Controls
-  document.getElementById("prev").addEventListener("click", () => {
-    currentMonth--;
-    if (currentMonth < 0) {
-      currentMonth = 11;
-      currentYear--;
-    }
-    render();
-  });
-
-  document.getElementById("next").addEventListener("click", () => {
-    currentMonth++;
-    if (currentMonth > 11) {
-      currentMonth = 0;
-      currentYear++;
-    }
-    render();
-  });
-
-  document.getElementById("print").addEventListener("click", () => window.print());
+// 1. Render instantly from cache if available
+const cached = localStorage.getItem("shiftData");
+if (cached) {
+  buildCalendar(year, month, JSON.parse(cached));
+} else {
+  buildCalendar(year, month, {}); // empty calendar if no cache yet
 }
 
-function render() {
-  buildCalendar(currentYear, currentMonth, shiftData);
+// 2. Show overlay while fetching
+overlay.style.display = "block";
 
-  // Re‑enable interactions after rebuilding DOM
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  enableInteractions(isTouchDevice);
-}
-
-init();
+// 3. Fetch fresh data in background
+fetchShiftData().then(data => {
+  if (data && Object.keys(data).length > 0) {
+    localStorage.setItem("shiftData", JSON.stringify(data));
+    buildCalendar(year, month, data);
+  }
+}).finally(() => {
+  overlay.style.display = "none"; // hide once fetch completes
+});
