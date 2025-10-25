@@ -49,21 +49,18 @@ export function buildCalendar(year, month, shiftData) {
         const note = document.createElement("div");
         note.className = "ref-note";
 
-        // Add color coding by label/person if you want
+        // Color coding by person/label
         if (shift.person === "Aaron" && shift.label === "A-Days") {
-          note.classList.add("nonnie"); // reuse your green style
+          note.classList.add("nonnie");
         } else if (shift.person === "Aaron" && shift.label === "A-Nights") {
-          note.classList.add("nonnie"); // same base, or make a darker shade
+          note.classList.add("nonnie"); // you can add a separate CSS class if you want nights distinct
         } else if (shift.person === "Kristin") {
-          note.classList.add("sophia"); // reuse your blue style
+          note.classList.add("sophia");
         }
 
-        note.textContent = shift.label; // only show A-Days / A-Nights / K-Work
+        note.textContent = shift.label;
         cell.appendChild(note);
       });
-    } else {
-      // No shifts → coverage needed
-      cell.classList.add("coverage-needed");
     }
 
     calendarEl.appendChild(cell);
