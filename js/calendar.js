@@ -37,12 +37,18 @@ export function buildCalendar(year, month, shiftData) {
     const cell = document.createElement("div");
     cell.className = "day";
 
+    const date = new Date(year, month, day);
+    const weekday = date.getDay(); // 0 = Sunday, 6 = Saturday
+    if (weekday === 0 || weekday === 6) {
+      cell.classList.add("weekend");
+    }
+
     const num = document.createElement("div");
     num.className = "day-number";
     num.textContent = day;
     cell.appendChild(num);
 
-    const dateKey = formatDateKey(new Date(year, month, day));
+    const dateKey = formatDateKey(date);
     const shifts = shiftData[dateKey];
 
     if (shifts && shifts.length > 0) {
