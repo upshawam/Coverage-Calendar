@@ -132,7 +132,7 @@ body {
 
 /* Weekend shading */
 .day.weekend {
-  background: #fafafa; /* subtle contrast for weekends */
+  background: #e6f0ff; /* stronger light blue shade for weekends */
 }
 
 /* Shift labels (A-Days, A-Nights, K-Work) */
