@@ -130,6 +130,26 @@ body {
   font-weight: bold;
 }
 
+/* === Shift labels (A-Days, A-Nights, K-Work) === */
+.shift-container {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  display: flex;
+  flex-direction: column; /* stack neatly if multiple */
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.shift-label {
+  font-size: 0.75em;
+  font-weight: 500;
+  color: #333;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
 /* Softer holiday styling */
 .holiday {
   background: #f9f9f9;
@@ -143,7 +163,7 @@ body {
   display: block;
 }
 
-/* Reference notes (K-Off, A-Days, A-Nights) */
+/* Reference notes (legacy K-Off, etc.) */
 .ref-note {
   font-size: 0.7em;
   color: #555;
