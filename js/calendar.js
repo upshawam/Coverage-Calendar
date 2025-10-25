@@ -42,16 +42,35 @@ export function buildCalendar(year, month, shiftData) {
     cell.appendChild(num);
 
     const dateKey = formatDateKey(new Date(year, month, day));
+    const info = shiftData[dateKey];
 
-    if (shiftData[dateKey] && shiftData[dateKey].length > 0) {
-      shiftData[dateKey].forEach(shift => {
-        const note = document.createElement("div");
-        note.className = `ref-note ${shift.person.toLowerCase()}`;
-        note.textContent = `${shift.person} (${shift.type}) ${shift.start}-${shift.end}`;
-        cell.appendChild(note);
-      });
+    if (info) {
+      // Show Aaron/Kristin working flags
+      if (info.aaronWorking === "Yes") {
+        const a = document.createElement("div");
+        a.className = "ref-note nonnie";
+        a.textContent = "Aaron Working";
+        cell.appendChild(a);
+      }
+      if (info.kristinWorking === "Yes") {
+        const k = document.createElement("div");
+        k.className = "ref-note sophia";
+        k.textContent = "Kristin Working";
+        cell.appendChild(k);
+      }
+      if (info.aaronNightBefore === "Yes") {
+        const n = document.createElement("div");
+        n.className = "ref-note";
+        n.textContent = "Aaron Night Before";
+        cell.appendChild(n);
+      }
+
+      // Coverage highlight
+      if (info.coverage === "Yes") {
+        cell.classList.add("coverage-needed");
+      }
     } else {
-      // No shift data → highlight coverage needed
+      // No entry at all for this date
       cell.classList.add("coverage-needed");
     }
 
