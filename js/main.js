@@ -28,17 +28,6 @@ function addAssignment(dateKey, person, text = null) {
   saveCustomAssignments(custom);
 }
 
-function removeAssignment(dateKey, person, text) {
-  const custom = loadCustomAssignments();
-  if (custom[dateKey]) {
-    custom[dateKey] = custom[dateKey].filter(
-      a => !(a.person === person && a.text === text)
-    );
-    if (custom[dateKey].length === 0) delete custom[dateKey];
-    saveCustomAssignments(custom);
-  }
-}
-
 function updateNoteText(dateKey, oldText, newText) {
   const custom = loadCustomAssignments();
   if (custom[dateKey]) {
@@ -99,7 +88,7 @@ function createAssignmentElement(dateKey, person, text = null) {
   } else if (person === "Note") {
     assignment.classList.add("note-card");
     assignment.setAttribute("contenteditable", "true");
-    assignment.textContent = text || "Note";
+    assignment.textContent = text || ""; // leave empty, placeholder shows via CSS
 
     // Save edits
     let oldText = assignment.textContent;
@@ -108,12 +97,6 @@ function createAssignmentElement(dateKey, person, text = null) {
       oldText = assignment.textContent;
     });
   }
-
-  // Double-click removal
-  assignment.addEventListener("dblclick", () => {
-    assignment.remove();
-    removeAssignment(dateKey, person, assignment.textContent);
-  });
 
   return assignment;
 }
@@ -144,7 +127,7 @@ function enableDayDropZones() {
       if (!person) return;
 
       const dateKey = formatDateKeyFromCell(day);
-      const assignment = createAssignmentElement(dateKey, person, person === "Note" ? "Note" : null);
+      const assignment = createAssignmentElement(dateKey, person, person === "Note" ? "" : null);
       day.appendChild(assignment);
 
       addAssignment(dateKey, person, assignment.textContent);
