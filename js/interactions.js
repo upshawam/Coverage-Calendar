@@ -7,8 +7,9 @@ export function enableInteractions(isTouchDevice) {
     enableTapToAssign();
   } else {
     enableDragAndDrop();
-    enableDoubleClickRemove(); // restore desktop double‑click removal
+    enableDoubleClickRemove();
   }
+  enableNoteRemoval(); // always enable long‑press removal for Notes
 }
 
 // --- Desktop: Drag & Drop ---
@@ -55,7 +56,7 @@ function enableTapToAssign() {
   });
 }
 
-// --- Double‑click remove (desktop only) ---
+// --- Desktop: Double‑click remove ---
 function enableDoubleClickRemove() {
   const days = document.querySelectorAll('.day');
   days.forEach(day => {
@@ -63,6 +64,23 @@ function enableDoubleClickRemove() {
       const target = e.target;
       if (target.classList.contains('assignment')) {
         target.remove();
+      }
+    });
+  });
+}
+
+// --- Mobile: Long‑press remove for Notes ---
+function enableNoteRemoval() {
+  const days = document.querySelectorAll('.day');
+  days.forEach(day => {
+    day.addEventListener('touchstart', e => {
+      const target = e.target;
+      if (target.classList.contains('note-card')) {
+        let timer = setTimeout(() => {
+          target.remove();
+        }, 600); // hold for 0.6s to remove
+
+        target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
       }
     });
   });
