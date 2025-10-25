@@ -1,7 +1,7 @@
 // data.js
 
 // Use your new published Apps Script endpoint
-const SHEETS_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLjg0a4Xc4slCdXxC-saaIWvHISg8VBbv_Og8YUKOb8_G6BtAx3Qy0N3VWU3hps9B7Z2LCy0dLvp8qnnWbK6VYU0bmowfR6z1sU0wYOHYiHwPq96enFBffkgsjbL2vI1GCGzIMslLti0DgLEq2oaaEKEgbgKjUUQYneimkp7OPozD23w4wympfB4m3PN0Z-bnJc3PkWJizIcuSCaOO8KxUSrQ9dXoidSh3IgUSbnFD_Cj6f5LFMM3duPCELGZjz_rrhUZTBW-mc9s8nvXMU7yHg37938cA&lib=MtyhWyQuWk5oj4-xBXtXtJNQvBsD6Bo-Z";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbx_kn7OZsKxSp-7MhZNDP1QMC3OUogRB0LfgA_92JHkOygnMdKH6fv6mcqQsflfeME/exec";
 
 export async function fetchShiftData() {
   try {
