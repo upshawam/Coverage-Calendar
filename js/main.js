@@ -1,5 +1,5 @@
 // main.js
-import { buildCalendar } from './calendar.js';
+import { buildCalendar as originalBuildCalendar } from './calendar.js';
 import { fetchShiftData } from './data.js';
 
 const today = new Date();
@@ -8,12 +8,44 @@ const month = today.getMonth();
 
 const overlay = document.getElementById("loading-overlay");
 
-// Render instantly from cache
+// --- Persistence helpers ---
+function loadCustomAssignments() {
+  return JSON.parse(localStorage.getItem("customAssignments") || "{}");
+}
+
+function saveCustomAssignments(assignments) {
+  localStorage.setItem("customAssignments", JSON.stringify(assignments));
+}
+
+// --- Calendar wrapper to reapply drops ---
+function buildCalendar(year, month, shiftData) {
+  originalBuildCalendar(year, month, shiftData);
+
+  // Reapply saved custom assignments
+  const custom = loadCustomAssignments();
+  Object.entries(custom).forEach(([dateKey, people]) => {
+    const dayCell = document.querySelector(
+      `.calendar .day:nth-child(${new Date(dateKey).getDate() + new Date(year, month, 1).getDay()})`
+    );
+    if (dayCell) {
+      people.forEach(person => {
+        const assignment = document.createElement("div");
+        assignment.className = "assignment";
+        assignment.textContent = person;
+        dayCell.appendChild(assignment);
+      });
+    }
+  });
+
+  enableDayDropZones();
+}
+
+// --- Initial render from cache ---
 const cached = localStorage.getItem("shiftData");
 if (cached) {
   buildCalendar(year, month, JSON.parse(cached));
 } else {
-  buildCalendar(year, month, {}); // shows grid structure even without data
+  buildCalendar(year, month, {});
 }
 
 // Show overlay during fetch
@@ -52,7 +84,7 @@ document.querySelectorAll(".card-container .assignment").forEach(card => {
 function enableDayDropZones() {
   document.querySelectorAll(".calendar .day").forEach(day => {
     day.addEventListener("dragover", e => {
-      e.preventDefault(); // allow drop
+      e.preventDefault();
     });
 
     day.addEventListener("drop", e => {
@@ -63,18 +95,23 @@ function enableDayDropZones() {
         assignment.className = "assignment";
         assignment.textContent = person;
         day.appendChild(assignment);
+
+        // Save to localStorage
+        const dateKey = formatDateKeyFromCell(day);
+        const custom = loadCustomAssignments();
+        if (!custom[dateKey]) custom[dateKey] = [];
+        custom[dateKey].push(person);
+        saveCustomAssignments(custom);
       }
     });
   });
 }
 
-// Run once on load
-enableDayDropZones();
-
-// Re-run after calendar rebuilds
-// (Monkey-patch buildCalendar to re-enable drop zones)
-const originalBuildCalendar = buildCalendar;
-window.buildCalendar = function(year, month, data) {
-  originalBuildCalendar(year, month, data);
-  enableDayDropZones();
-};
+// Helper: infer dateKey from a day cell
+function formatDateKeyFromCell(dayCell) {
+  const dayNum = dayCell.querySelector(".day-number").textContent;
+  const y = year;
+  const m = String(month + 1).padStart(2, "0");
+  const d = String(dayNum).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
