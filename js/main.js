@@ -31,14 +31,14 @@ async function init() {
   });
 
   document.getElementById("print").addEventListener("click", () => window.print());
-
-  // Enable interactions
-  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  enableInteractions(isTouchDevice);
 }
 
 function render() {
   buildCalendar(currentYear, currentMonth, shiftData);
+
+  // Re‑enable interactions after rebuilding DOM
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  enableInteractions(isTouchDevice);
 }
 
 init();
