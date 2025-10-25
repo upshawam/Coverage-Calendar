@@ -42,35 +42,27 @@ export function buildCalendar(year, month, shiftData) {
     cell.appendChild(num);
 
     const dateKey = formatDateKey(new Date(year, month, day));
-    const info = shiftData[dateKey];
+    const shifts = shiftData[dateKey];
 
-    if (info) {
-      // Show Aaron/Kristin working flags
-      if (info.aaronWorking === "Yes") {
-        const a = document.createElement("div");
-        a.className = "ref-note nonnie";
-        a.textContent = "Aaron Working";
-        cell.appendChild(a);
-      }
-      if (info.kristinWorking === "Yes") {
-        const k = document.createElement("div");
-        k.className = "ref-note sophia";
-        k.textContent = "Kristin Working";
-        cell.appendChild(k);
-      }
-      if (info.aaronNightBefore === "Yes") {
-        const n = document.createElement("div");
-        n.className = "ref-note";
-        n.textContent = "Aaron Night Before";
-        cell.appendChild(n);
-      }
+    if (shifts && shifts.length > 0) {
+      shifts.forEach(shift => {
+        const note = document.createElement("div");
+        note.className = "ref-note";
 
-      // Coverage highlight
-      if (info.coverage === "Yes") {
-        cell.classList.add("coverage-needed");
-      }
+        // Add color coding by label/person if you want
+        if (shift.person === "Aaron" && shift.label === "A-Days") {
+          note.classList.add("nonnie"); // reuse your green style
+        } else if (shift.person === "Aaron" && shift.label === "A-Nights") {
+          note.classList.add("nonnie"); // same base, or make a darker shade
+        } else if (shift.person === "Kristin") {
+          note.classList.add("sophia"); // reuse your blue style
+        }
+
+        note.textContent = shift.label; // only show A-Days / A-Nights / K-Work
+        cell.appendChild(note);
+      });
     } else {
-      // No entry at all for this date
+      // No shifts → coverage needed
       cell.classList.add("coverage-needed");
     }
 
