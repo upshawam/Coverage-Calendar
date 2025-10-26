@@ -122,15 +122,26 @@ function buildCalendar(year, month, shiftData) {
 
   const numDays = daysInMonth(year, month);
   const firstDay = getWeekday(year, month, 1);
-
-  // Empty slots before first day
-  for (let i = 0; i < firstDay; i++) {
-    calendarEl.appendChild(document.createElement("div"));
-  }
+  const daysInPrevMonth = daysInMonth(year, month - 1);
 
   const holidays = getUSHolidays(year);
   const cellMap = new Map();
 
+  // Fill previous month days
+  for (let i = 0; i < firstDay; i++) {
+    const dayNum = daysInPrevMonth - firstDay + 1 + i;
+    const cell = document.createElement("div");
+    cell.className = "day other-month";
+
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = dayNum;
+    cell.appendChild(num);
+
+    calendarEl.appendChild(cell);
+  }
+
+  // Fill current month days
   for (let day = 1; day <= numDays; day++) {
     const cell = document.createElement("div");
     cell.className = "day";
@@ -171,6 +182,21 @@ function buildCalendar(year, month, shiftData) {
     calendarEl.appendChild(cell);
   }
 
+  // Fill next month days to complete the grid
+  const totalCells = firstDay + numDays;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    const cell = document.createElement("div");
+    cell.className = "day other-month";
+
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = d;
+    cell.appendChild(num);
+
+    calendarEl.appendChild(cell);
+  }
+
   // Reapply saved custom assignments
   const custom = loadCustomAssignments();
   Object.entries(custom).forEach(([dateKey, items]) => {
@@ -185,6 +211,7 @@ function buildCalendar(year, month, shiftData) {
 
   enableInteractions("ontouchstart" in window);
 }
+
 
 /* -----------------------------
    Assignment Element Factory
