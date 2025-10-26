@@ -1,7 +1,6 @@
 /* -----------------------------
    Constants / Globals
 ------------------------------ */
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbzqz3OCakG5SaWsGjUlLTQyGb3uGVYKyQ938SLrXb-i4w_1--pSyKc-h0jgMGHQ1L_Q/exec";
 
 const today = new Date();
 let currentYear = today.getFullYear();
@@ -40,9 +39,11 @@ function updateNoteText(dateKey, oldText, newText) {
 /* -----------------------------
    Data Fetching
 ------------------------------ */
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbzqz3OCakG5SaWsGjUlLTQyGb3uGVYKyQ938SLrXb-i4w_1--pSyKc-h0jgMGHQ1L_Q/exec";
+
 async function fetchShiftData() {
   try {
-    const res = await fetch(SHEETS_URL, { cache: "no-store" });
+    const res = await fetch(SHEETS_URL + "?ts=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     console.log("Fetched shift data:", data);
@@ -68,6 +69,15 @@ function formatDateKey(date) {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
+
+/* -----------------------------
+   Data Loading / Build Calendar
+------------------------------ */
+async function loadShiftsAndBuild(year, month) {
+  const data = await fetchShiftData();
+  buildCalendar(year, month, data);
+}
+
 
 /* -----------------------------
    Holiday Helpers
@@ -396,23 +406,24 @@ document.getElementById("print").addEventListener("click", () => {
 /* ========================================================================== */
 /*                               Initialization                               */
 /* ========================================================================== */
-document.addEventListener("DOMContentLoaded", () => {
-  // Always draw the grid immediately
-  buildCalendar(currentYear, currentMonth, {});
-
-  // Show overlay only as a small banner, not full cover
+document.addEventListener("DOMContentLoaded", async () => {
   overlay.style.display = "block";
 
-  fetchShiftData()
-    .then(data => {
-      if (data && Object.keys(data).length > 0) {
-        localStorage.setItem("shiftData", JSON.stringify(data));
-        buildCalendar(currentYear, currentMonth, data);
-      }
-    })
-    .finally(() => {
-      overlay.style.display = "none";
-    });
+  try {
+    const data = await fetchShiftData();
+    if (data && Object.keys(data).length > 0) {
+      localStorage.setItem("shiftData", JSON.stringify(data));
+      buildCalendar(currentYear, currentMonth, data);
+    } else {
+      // fallback if no data
+      buildCalendar(currentYear, currentMonth, {});
+    }
+  } catch (err) {
+    console.error("Error during initialization:", err);
+    buildCalendar(currentYear, currentMonth, {});
+  } finally {
+    overlay.style.display = "none";
+  }
 });
 
  
