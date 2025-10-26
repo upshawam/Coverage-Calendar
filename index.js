@@ -151,50 +151,35 @@ function buildCalendar(year, month, shiftData) {
     calendarEl.appendChild(cell);
   }
 
- // Fill current month days
-for (let day = 1; day <= numDays; day++) {
-  const cell = document.createElement("div");
-  cell.className = "day";
+  // Fill current month days
+  for (let day = 1; day <= numDays; day++) {
+    const cell = document.createElement("div");
+    cell.className = "day";
 
-  const date = new Date(year, month, day);
-  if (date.getDay() === 0 || date.getDay() === 6) {
-    cell.classList.add("weekend");
-  }
+    const date = new Date(year, month, day);
+    if (date.getDay() === 0 || date.getDay() === 6) cell.classList.add("weekend");
 
-  const num = document.createElement("div");
-  num.className = "day-number";
-  num.textContent = day;
-  cell.appendChild(num);
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = day;
+    cell.appendChild(num);
 
-  const dateKey = formatDateKey(date);
-  cellMap.set(dateKey, cell);
+    const dateKey = formatDateKey(date);
+    cellMap.set(dateKey, cell);
 
-  // 🔎 Safe debug log: won't crash if shiftData is undefined
-  if (shiftData) {
-    console.log("Rendering dateKey:", dateKey, "Shifts:", shiftData[dateKey]);
-  } else {
-    console.log("Rendering dateKey:", dateKey, "Shifts: shiftData is undefined");
-  }
-
-  // Shifts
-  const shifts = shiftData && Array.isArray(shiftData[dateKey]) ? shiftData[dateKey] : [];
-  if (shifts.length > 0) {
-    const shiftContainer = document.createElement("div");
-    shiftContainer.className = "shift-container";
-
-    shifts.forEach(shift => {
-      const label = document.createElement("div");
-      label.className = "shift-label";
-      label.textContent = shift.label;
-      shiftContainer.appendChild(label);
-    });
-
-    cell.appendChild(shiftContainer);
-  }
-
-  calendarEl.appendChild(cell);
-}
-
+    // Shifts
+    const shifts = shiftData[dateKey];
+    if (shifts) {
+      const shiftContainer = document.createElement("div");
+      shiftContainer.className = "shift-container";
+      shifts.forEach(shift => {
+        const label = document.createElement("div");
+        label.className = "shift-label";
+        label.textContent = shift.label;
+        shiftContainer.appendChild(label);
+      });
+      cell.appendChild(shiftContainer);
+    }
 
     // Holidays
     if (holidays[dateKey]) {
