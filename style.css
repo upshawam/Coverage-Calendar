@@ -23,44 +23,52 @@ body {
 }
 
 /* ========================================================================== */
-/*                                   Nav Bar                                  */
+/*                                Header Layout                               */
 /* ========================================================================== */
-.nav {
-  max-width: 900px;
-  margin: 0 auto 15px auto;
-  position: relative;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1100px;
+  margin: 0 auto 20px auto;
+  gap: 20px;
 }
 
-/* Top row: print button aligned right */
+/* Left column: title + nav */
+.header-left {
+  flex: 1;
+}
+
 .nav-top {
   display: flex;
   justify-content: flex-end;
-  padding: 4px 6px;   /* slight padding around print button */
+  padding: 4px 6px; /* padding around print button */
 }
 
-/* Middle row: month/year title centered */
 .nav-middle {
-  text-align: center;
+  text-align: left; /* left-align the month/year */
   margin: 4px 0;
 }
 
 #title {
-  font-size: 2.2em;
-  font-weight: 800;
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 3.8em; /* large and clean */
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   margin: 0;
+  color: #222;
 }
 
-/* Bottom row: prev/next centered under title */
 .nav-bottom {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start; /* prev/next under the title */
   gap: 12px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
-.nav button {
+.nav-bottom button,
+.nav-top button {
   background: #eee;
   border: 1px solid #ccc;
   padding: 4px 10px;
@@ -69,21 +77,59 @@ body {
   font-size: 0.9em;
 }
 
-.nav button:hover {
+.nav-bottom button:hover,
+.nav-top button:hover {
   background: #ddd;
 }
 
+/* Right column: Drag/Drop tray */
+.header-right {
+  width: 220px;
+}
+
+.tray-box {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px;
+  background: #fafafa;
+}
+
+.tray-title {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 6px;
+  font-size: 0.95em;
+  color: #444;
+}
+
+.header-right .card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+  margin: 0; /* override global margin */
+}
+
 /* ========================================================================== */
-/*                               Month Title                                  */
+/*                                Tray Hint                                   */
 /* ========================================================================== */
-#title {
-  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 3.8em;          /* slightly smaller */
-  font-weight: 600;          /* cleaner, less heavy */
-  text-transform: uppercase;
-  letter-spacing: 1px;       /* subtle spacing */
-  margin: 0;
-  color: #222;               /* softer than pure black */
+.tray-hint {
+  font-size: 0.75em;
+  font-weight: normal;
+  color: #666;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ========================================================================== */
+/*                           Other Month Days                                */
+/* ========================================================================== */
+.day.other-month .day-number {
+  color: #aaa;
+  font-weight: normal;
+}
+.day.other-month {
+  background: #f9f9f9; /* optional subtle background */
 }
 
 /* ========================================================================== */
@@ -97,10 +143,6 @@ body {
   display: inline-block;
 }
 
-.card-container {
-  text-align: center;
-  margin: 10px auto 20px auto;
-}
 .card-container .assignment {
   margin: 0 10px;
   padding: 6px 10px;
@@ -108,7 +150,6 @@ body {
   cursor: grab;
 }
 
-/* Tray note pill — same size as Nonnie/Sophia */
 .card-container .note-card {
   display: inline-block;
   width: auto;
@@ -148,14 +189,12 @@ body {
   margin-top: 2px;
 }
 
-/* Editable notes */
 .calendar .assignment.note-card[contenteditable="true"] {
   cursor: text;
   font-weight: normal;
   resize: vertical;
 }
 
-/* Placeholder text when empty */
 .calendar .assignment.note-card[contenteditable="true"]:empty:before {
   content: "Note";
   color: #aaa;
@@ -193,8 +232,6 @@ body {
   padding: 4px;
   position: relative;
   box-sizing: border-box;
-
-  /* Critical: prevent horizontal expansion */
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -204,7 +241,6 @@ body {
   font-weight: bold;
 }
 
-/* Weekend shading */
 .day.weekend {
   background: #e6f0ff;
 }
@@ -261,7 +297,8 @@ body {
     cursor: default;
   }
   .card-container,
-  .nav button {
+  .nav button,
+  .tray-box {
     display: none;
   }
   #title {
@@ -276,38 +313,16 @@ body {
 /* ========================================================================== */
 /*                           Mobile Responsive                                */
 /* ========================================================================== */
-@media (max-width: 600px) {
-  .calendar {
-    grid-template-columns: repeat(7, 1fr);
-    max-width: 100%;
-    margin: 0 4px;
-    font-size: 0.7rem;
+@media (max-width: 700px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
   }
-  .weekday-row {
-    grid-template-columns: repeat(7, 1fr);
-    font-size: 0.7rem;
-  }
-  .day {
-    min-height: 60px;
-    padding: 2px;
-  }
-  .day-number {
-    font-size: 0.8rem;
-  }
-  .assignment {
-    font-size: 0.7rem;
-    padding: 2px 4px;
-  }
-  .shift-label {
-    font-size: 0.6em;
-  }
-  button {
-    font-size: 0.8rem;
-    padding: 4px 8px;
-    margin: 2px;
+  .header-right {
+    width: 100%;
+    margin-top: 12px;
   }
   #title {
-    font-size: 1.2rem;
-    margin-bottom: 6px;
+    font-size: 2em;
   }
 }
