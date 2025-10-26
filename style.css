@@ -1,3 +1,6 @@
+/* ========================================================================== */
+/*                                   Global                                   */
+/* ========================================================================== */
 body {
   font-family: sans-serif;
   margin: 0;
@@ -19,22 +22,45 @@ body {
   display: none;
 }
 
+/* ========================================================================== */
+/*                                   Nav Bar                                  */
+/* ========================================================================== */
 .nav {
+  max-width: 900px;
+  margin: 0 auto 15px auto;
+  position: relative;
+}
+
+/* Top row: print button aligned right */
+.nav-top {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 6px;   /* slight padding around print button */
+}
+
+/* Middle row: month/year title centered */
+.nav-middle {
   text-align: center;
-  margin-bottom: 10px;
+  margin: 4px 0;
 }
 
 #title {
-  font-size: 2.5em;
+  font-size: 2.2em;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
-  margin: 0 20px;
+  margin: 0;
 }
 
-/* Print button styling */
-#print {
-  margin-left: 20px;
+/* Bottom row: prev/next centered under title */
+.nav-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.nav button {
   background: #eee;
   border: 1px solid #ccc;
   padding: 4px 10px;
@@ -42,67 +68,102 @@ body {
   cursor: pointer;
   font-size: 0.9em;
 }
-#print:hover {
+
+.nav button:hover {
   background: #ddd;
+}
+
+/* ========================================================================== */
+/*                               Month Title                                  */
+/* ========================================================================== */
+#title {
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 3.8em;          /* slightly smaller */
+  font-weight: 600;          /* cleaner, less heavy */
+  text-transform: uppercase;
+  letter-spacing: 1px;       /* subtle spacing */
+  margin: 0;
+  color: #222;               /* softer than pure black */
+}
+
+/* ========================================================================== */
+/*                              Assignment Cards                              */
+/* ========================================================================== */
+.assignment {
+  border-radius: 4px;
+  font-size: 0.85em;
+  margin: 2px 0;
+  padding: 2px 6px;
+  display: inline-block;
 }
 
 .card-container {
   text-align: center;
   margin: 10px auto 20px auto;
 }
-
 .card-container .assignment {
   margin: 0 10px;
   padding: 6px 10px;
-  border-radius: 4px;
-  cursor: grab;
-  display: inline-block;
   font-weight: bold;
+  cursor: grab;
 }
 
-.calendar .assignment {
-  font-weight: normal;
-  padding: 2px 6px;
-  margin: 2px 0;
+/* Tray note pill — same size as Nonnie/Sophia */
+.card-container .note-card {
+  display: inline-block;
+  width: auto;
+  max-width: 180px;
+  padding: 6px 10px;
   font-size: 0.85em;
   border-radius: 4px;
-  display: inline-block;
+  background: #fff9c4;
+  border: 1px solid #f0e68c;
+  box-sizing: border-box;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .nonnie { background: #c8e6c9; }
 .sophia { background: #bbdefb; }
 
-/* Note pill styling (tray + dropped) */
-.note-card {
+/* ========================================================================== */
+/*                                Note Cards                                  */
+/* ========================================================================== */
+.calendar .note-card {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
   background: #fff9c4;
   border: 1px solid #f0e68c;
   border-radius: 4px;
-  padding: 4px 6px;
-  font-size: 0.85em;
   color: #333;
-  box-sizing: border-box;
-  word-wrap: break-word;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  max-width: 100%;       /* never overflow horizontally */
-  min-width: 60px;
-  min-height: 24px;
+  font-size: 0.8em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  min-height: 1.2em;
+  margin-top: 2px;
 }
 
 /* Editable notes */
-.assignment.note-card[contenteditable="true"] {
+.calendar .assignment.note-card[contenteditable="true"] {
   cursor: text;
-  display: block;
   font-weight: normal;
-  resize: vertical;       /* allow vertical resizing */
+  resize: vertical;
 }
 
 /* Placeholder text when empty */
-.assignment.note-card[contenteditable="true"]:empty:before {
+.calendar .assignment.note-card[contenteditable="true"]:empty:before {
   content: "Note";
   color: #aaa;
 }
 
+/* ========================================================================== */
+/*                              Calendar Layout                               */
+/* ========================================================================== */
 .weekday-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -110,7 +171,6 @@ body {
   margin: 0 auto;
   text-align: center;
   font-weight: bold;
-  border-collapse: collapse;
 }
 
 .weekday-row div {
@@ -125,7 +185,6 @@ body {
   grid-template-columns: repeat(7, 1fr);
   max-width: 900px;
   margin: 0 auto;
-  border-collapse: collapse;
 }
 
 .day {
@@ -134,6 +193,11 @@ body {
   padding: 4px;
   position: relative;
   box-sizing: border-box;
+
+  /* Critical: prevent horizontal expansion */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .day-number {
@@ -142,10 +206,12 @@ body {
 
 /* Weekend shading */
 .day.weekend {
-  background: #e6f0ff; /* light blue for weekends */
+  background: #e6f0ff;
 }
 
-/* Shift labels (A-Days, A-Nights, K-Work) */
+/* ========================================================================== */
+/*                               Shift Labels                                 */
+/* ========================================================================== */
 .shift-container {
   position: absolute;
   bottom: 2px;
@@ -155,22 +221,15 @@ body {
   align-items: flex-start;
   gap: 2px;
 }
-
 .shift-label {
-  font-size: 0.75em; /* desktop size */
+  font-size: 0.75em;
   font-weight: 500;
   color: #333;
-  background: none;
-  padding: 0;
-  margin: 0;
 }
 
-/* Holiday styling */
-.holiday {
-  background: #f9f9f9;
-  border: 1px dashed #bbb;
-}
-
+/* ========================================================================== */
+/*                              Holiday Styling                               */
+/* ========================================================================== */
 .holiday-label {
   font-size: 0.75em;
   color: #666;
@@ -178,28 +237,22 @@ body {
   display: block;
 }
 
-/* Reference notes (legacy) */
-.ref-note {
-  font-size: 0.7em;
-  color: #555;
-  margin-top: 4px;
-  display: block;
-  text-align: left;
-}
-
-/* Coverage highlight */
+/* ========================================================================== */
+/*                           Coverage & Active States                         */
+/* ========================================================================== */
 .coverage-needed {
   border: 2px solid #ff9800;
   background: #fff3e0;
 }
 
-/* Active (selected) assignment card */
 .assignment.active {
   outline: 2px solid #0077cc;
   outline-offset: 2px;
 }
 
-/* Print styles */
+/* ========================================================================== */
+/*                                Print Styles                                */
+/* ========================================================================== */
 @media print {
   body {
     background: white;
@@ -220,7 +273,9 @@ body {
   }
 }
 
-/* === Mobile Responsive === */
+/* ========================================================================== */
+/*                           Mobile Responsive                                */
+/* ========================================================================== */
 @media (max-width: 600px) {
   .calendar {
     grid-template-columns: repeat(7, 1fr);
@@ -228,40 +283,29 @@ body {
     margin: 0 4px;
     font-size: 0.7rem;
   }
-
   .weekday-row {
     grid-template-columns: repeat(7, 1fr);
     font-size: 0.7rem;
   }
-
   .day {
     min-height: 60px;
     padding: 2px;
   }
-
   .day-number {
     font-size: 0.8rem;
   }
-
-  .ref-note {
-    font-size: 0.65rem;
-  }
-
   .assignment {
     font-size: 0.7rem;
     padding: 2px 4px;
   }
-
   .shift-label {
-    font-size: 0.6em; /* smaller on mobile */
+    font-size: 0.6em;
   }
-
   button {
     font-size: 0.8rem;
     padding: 4px 8px;
     margin: 2px;
   }
-
   #title {
     font-size: 1.2rem;
     margin-bottom: 6px;
