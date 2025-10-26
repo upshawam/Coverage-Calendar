@@ -382,7 +382,7 @@ function addAssignment(day, person) {
 
   day.appendChild(assignment);
   addAssignmentToStorage(dateKey, person, assignment.textContent);
-
+}
 
 /* -----------------------------
    Persistence Removal Helper
