@@ -1,39 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Shift Calendar</title>
-  <!-- Match the actual file name -->
+  <title>Coverage Calendar</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Loading overlay (hidden by default, shown during fetch) -->
-  <div id="loading-overlay">Loading latest schedule…</div>
-
-  <!-- Navigation / title -->
   <div class="nav">
-    <button id="prev">Prev</button>
+    <button id="prev">◀ Prev</button>
     <span id="title"></span>
-    <button id="next">Next</button>
-    <button id="print">Print</button>
+    <button id="next">Next ▶</button>
   </div>
 
-  <!-- Tray of assignment cards -->
-  <div class="card-container" id="tray">
-    <div class="assignment nonnie" data-person="Nonnie">Nonnie</div>
-    <div class="assignment sophia" data-person="Sophia">Sophia</div>
-    <div class="assignment note-card" data-person="Note">Note</div>
+  <!-- Static tray under title -->
+ <div class="card-container" id="tray">
+  <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
+  <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
+  <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
+</div>
 
-  </div>
 
   <!-- Weekday headers -->
   <div class="weekday-row" id="weekday-row"></div>
 
-  <!-- Calendar grid -->
   <div class="calendar" id="calendar"></div>
 
-  <!-- Scripts -->
-  <!-- main.js is inside /js/ -->
-  <script type="module" src="js/main.js"></script>
+  <script src="index.js"></script>
 </body>
 </html>
