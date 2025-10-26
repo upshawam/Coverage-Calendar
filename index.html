@@ -6,24 +6,41 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="nav">
-  <button id="prev">◀ Prev</button>
-  <span id="title"></span>
-  <button id="next">Next ▶</button>
-  <button id="print">🖨 Print</button>
-</div>
+  <div class="header">
+    <!-- Left side: title + nav -->
+    <div class="header-left">
+      <div class="nav-top">
+        <button id="print">🖨 Print</button>
+      </div>
+      <div class="nav-middle">
+        <span id="title"></span>
+      </div>
+      <div class="nav-bottom">
+        <button id="prev">◀ Prev</button>
+        <button id="next">Next ▶</button>
+      </div>
+    </div>
 
-  <!-- Static tray under title -->
- <div class="card-container" id="tray">
-  <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
-  <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
-  <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
-</div>
+    <!-- Right side: drag/drop tray -->
+    <div class="header-right">
+      <div class="tray-box">
+        <div class="tray-title">Drag/Drop</div>
 
+        <div class="card-container" id="tray">
+          <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
+          <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
+          <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
+        </div>
+
+        <div class="tray-hint">(Double‑click to remove)</div>
+      </div>
+    </div>
+  </div> <!-- closes .header -->
 
   <!-- Weekday headers -->
   <div class="weekday-row" id="weekday-row"></div>
 
+  <!-- Calendar grid -->
   <div class="calendar" id="calendar"></div>
 
   <script src="index.js"></script>
