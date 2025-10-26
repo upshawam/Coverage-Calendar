@@ -151,35 +151,50 @@ function buildCalendar(year, month, shiftData) {
     calendarEl.appendChild(cell);
   }
 
-  // Fill current month days
-  for (let day = 1; day <= numDays; day++) {
-    const cell = document.createElement("div");
-    cell.className = "day";
+ // Fill current month days
+for (let day = 1; day <= numDays; day++) {
+  const cell = document.createElement("div");
+  cell.className = "day";
 
-    const date = new Date(year, month, day);
-    if (date.getDay() === 0 || date.getDay() === 6) cell.classList.add("weekend");
+  const date = new Date(year, month, day);
+  if (date.getDay() === 0 || date.getDay() === 6) {
+    cell.classList.add("weekend");
+  }
 
-    const num = document.createElement("div");
-    num.className = "day-number";
-    num.textContent = day;
-    cell.appendChild(num);
+  const num = document.createElement("div");
+  num.className = "day-number";
+  num.textContent = day;
+  cell.appendChild(num);
 
-    const dateKey = formatDateKey(date);
-    cellMap.set(dateKey, cell);
+  const dateKey = formatDateKey(date);
+  cellMap.set(dateKey, cell);
 
-    // Shifts
-    const shifts = shiftData[dateKey];
-    if (shifts) {
-      const shiftContainer = document.createElement("div");
-      shiftContainer.className = "shift-container";
-      shifts.forEach(shift => {
-        const label = document.createElement("div");
-        label.className = "shift-label";
-        label.textContent = shift.label;
-        shiftContainer.appendChild(label);
-      });
-      cell.appendChild(shiftContainer);
-    }
+  // 🔎 Safe debug log: won't crash if shiftData is undefined
+  if (shiftData) {
+    console.log("Rendering dateKey:", dateKey, "Shifts:", shiftData[dateKey]);
+  } else {
+    console.log("Rendering dateKey:", dateKey, "Shifts: shiftData is undefined");
+  }
+
+  // Shifts
+  const shifts = shiftData && Array.isArray(shiftData[dateKey]) ? shiftData[dateKey] : [];
+  if (shifts.length > 0) {
+    const shiftContainer = document.createElement("div");
+    shiftContainer.className = "shift-container";
+
+    shifts.forEach(shift => {
+      const label = document.createElement("div");
+      label.className = "shift-label";
+      label.textContent = shift.label;
+      shiftContainer.appendChild(label);
+    });
+
+    cell.appendChild(shiftContainer);
+  }
+
+  calendarEl.appendChild(cell);
+}
+
 
     // Holidays
     if (holidays[dateKey]) {
@@ -410,12 +425,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   overlay.style.display = "block";
 
   try {
+    // Fetch fresh shift data
     const data = await fetchShiftData();
+
     if (data && Object.keys(data).length > 0) {
+      // Save to localStorage for navigation buttons
       localStorage.setItem("shiftData", JSON.stringify(data));
+
+      // Build the calendar immediately with real data
       buildCalendar(currentYear, currentMonth, data);
     } else {
-      // fallback if no data
+      // Fallback if no data returned
       buildCalendar(currentYear, currentMonth, {});
     }
   } catch (err) {
@@ -425,5 +445,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     overlay.style.display = "none";
   }
 });
-
- 
