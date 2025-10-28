@@ -16,18 +16,15 @@ let selectedPerson = null;
 function loadCustomAssignments() {
   return JSON.parse(localStorage.getItem("customAssignments") || "{}");
 }
-
 function saveCustomAssignments(assignments) {
   localStorage.setItem("customAssignments", JSON.stringify(assignments));
 }
-
 function addAssignmentToStorage(dateKey, person, text = null) {
   const custom = loadCustomAssignments();
   if (!custom[dateKey]) custom[dateKey] = [];
   custom[dateKey].push({ person, text });
   saveCustomAssignments(custom);
 }
-
 function updateNoteText(dateKey, oldText, newText) {
   const custom = loadCustomAssignments();
   if (custom[dateKey]) {
@@ -63,11 +60,9 @@ async function fetchShiftData() {
 function daysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
-
 function getWeekday(year, month, day) {
   return new Date(year, month, day).getDay();
 }
-
 function formatDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -83,6 +78,7 @@ async function loadShiftsAndBuild(year, month) {
   buildCalendar(year, month, data);
 }
 
+
 /* -----------------------------
    Holiday Helpers
 ------------------------------ */
@@ -91,13 +87,11 @@ function nthWeekday(year, month, weekday, n) {
   const offset = (7 + weekday - first.getDay()) % 7;
   return new Date(year, month, 1 + offset + 7 * (n - 1));
 }
-
 function lastWeekday(year, month, weekday) {
   const last = new Date(year, month + 1, 0);
   const offset = (7 + last.getDay() - weekday) % 7;
   return new Date(year, month + 1, 0 - offset);
 }
-
 function getUSHolidays(year) {
   const holidays = {};
   holidays[`${year}-01-01`] = "New Year's Day";
@@ -130,7 +124,7 @@ function buildCalendar(year, month, shiftData) {
   titleEl.textContent = `${monthName} ${year}`;
 
   // Weekday headers
-  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(d => {
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
     const div = document.createElement("div");
     div.textContent = d;
     weekdayRow.appendChild(div);
@@ -143,9 +137,7 @@ function buildCalendar(year, month, shiftData) {
   const holidays = getUSHolidays(year);
   const cellMap = new Map();
 
-  // ------------------------------
   // Fill previous month days
-  // ------------------------------
   for (let i = 0; i < firstDay; i++) {
     const dayNum = daysInPrevMonth - firstDay + 1 + i;
     const cell = document.createElement("div");
@@ -156,25 +148,16 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = dayNum;
     cell.appendChild(num);
 
-    const prevDate = new Date(year, month - 1, dayNum);
-    const prevKey = formatDateKey(prevDate);
-    cell.dataset.dateKey = prevKey;
-    cellMap.set(prevKey, cell);
-
     calendarEl.appendChild(cell);
   }
 
-  // ------------------------------
   // Fill current month days
-  // ------------------------------
   for (let day = 1; day <= numDays; day++) {
     const cell = document.createElement("div");
     cell.className = "day";
 
     const date = new Date(year, month, day);
-    if (date.getDay() === 0 || date.getDay() === 6) {
-      cell.classList.add("weekend");
-    }
+    if (date.getDay() === 0 || date.getDay() === 6) cell.classList.add("weekend");
 
     const num = document.createElement("div");
     num.className = "day-number";
@@ -182,8 +165,21 @@ function buildCalendar(year, month, shiftData) {
     cell.appendChild(num);
 
     const dateKey = formatDateKey(date);
-    cell.dataset.dateKey = dateKey;
     cellMap.set(dateKey, cell);
+
+    // Shifts
+    const shifts = shiftData[dateKey];
+    if (shifts) {
+      const shiftContainer = document.createElement("div");
+      shiftContainer.className = "shift-container";
+      shifts.forEach(shift => {
+        const label = document.createElement("div");
+        label.className = "shift-label";
+        label.textContent = shift.label;
+        shiftContainer.appendChild(label);
+      });
+      cell.appendChild(shiftContainer);
+    }
 
     // Holidays
     if (holidays[dateKey]) {
@@ -196,9 +192,7 @@ function buildCalendar(year, month, shiftData) {
     calendarEl.appendChild(cell);
   }
 
-  // ------------------------------
-  // Fill next month days
-  // ------------------------------
+  // Fill next month days to complete the grid
   const totalCells = firstDay + numDays;
   const remaining = (7 - (totalCells % 7)) % 7;
   for (let d = 1; d <= remaining; d++) {
@@ -210,38 +204,24 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = d;
     cell.appendChild(num);
 
-    const nextDate = new Date(year, month + 1, d);
-    const nextKey = formatDateKey(nextDate);
-    cell.dataset.dateKey = nextKey;
-    cellMap.set(nextKey, cell);
-
     calendarEl.appendChild(cell);
   }
 
-  // ------------------------------
-  // Re-apply custom assignments
-  // ------------------------------
+  // Reapply saved custom assignments
   const custom = loadCustomAssignments();
   Object.entries(custom).forEach(([dateKey, items]) => {
     const cell = cellMap.get(dateKey);
     if (cell) {
-      // Clear any old assignments first
-      cell.querySelectorAll('.assignment').forEach(el => el.remove());
-
       items.forEach(item => {
         const assignment = createAssignmentElement(dateKey, item.person, item.text);
-
-        // Make draggable
-        assignment.draggable = true;
-        assignment.addEventListener('dragstart', e => {
-          e.dataTransfer.setData('text/plain', assignment.dataset.person);
-        });
-
         cell.appendChild(assignment);
       });
     }
   });
+
+  enableInteractions("ontouchstart" in window);
 }
+
 
 /* -----------------------------
    Assignment Element Factory
@@ -249,7 +229,6 @@ function buildCalendar(year, month, shiftData) {
 function createAssignmentElement(dateKey, person, text = null) {
   const assignment = document.createElement("div");
   assignment.classList.add("assignment", person.toLowerCase());
-  assignment.dataset.person = person;   // ✅ critical for drag/drop
 
   if (person === "Note") {
     assignment.classList.add("note-card");
@@ -263,7 +242,6 @@ function createAssignmentElement(dateKey, person, text = null) {
   } else {
     assignment.textContent = person;
   }
-
   return assignment;
 }
 
@@ -284,14 +262,12 @@ function enableDragAndDrop() {
   const trayCards = document.querySelectorAll('#tray .assignment');
   const days = document.querySelectorAll('.day');
 
-  // Tray cards can be dragged
   trayCards.forEach(card => {
     card.addEventListener('dragstart', e => {
       e.dataTransfer.setData('text/plain', card.dataset.person);
     });
   });
 
-  // Days accept drops
   days.forEach(day => {
     day.addEventListener('dragover', e => e.preventDefault());
     day.addEventListener('drop', e => {
@@ -322,47 +298,52 @@ function enableTapToAssign() {
   });
 }
 
-// Delegated double-click removal
 function enableDoubleClickRemove() {
-  const calendarEl = document.getElementById("calendar");
-  calendarEl.addEventListener('dblclick', e => {
-    const target = e.target;
-    if (target.classList.contains('assignment')) {
-      const day = target.closest('.day');
-      const dateKey = day.dataset.dateKey;
-      const person = target.classList.contains("note-card") ? "Note" : target.textContent;
-      const text = target.classList.contains("note-card") ? target.textContent : null;
+  const days = document.querySelectorAll('.day');
+  days.forEach(day => {
+    day.addEventListener('dblclick', e => {
+      const target = e.target;
+      if (target.classList.contains('assignment')) {
+        const dateKey = formatDateKey(
+          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+        );
+        const person = target.classList.contains("note-card") ? "Note" : target.textContent;
+        const text = target.classList.contains("note-card") ? target.textContent : null;
 
-      target.remove();
-      removeAssignmentFromStorage(dateKey, person, text);
-    }
+        target.remove();
+        removeAssignmentFromStorage(dateKey, person, text);
+      }
+    });
   });
 }
 
-// Delegated long-press removal for notes
 function enableNoteRemoval() {
-  const calendarEl = document.getElementById("calendar");
+  const days = document.querySelectorAll('.day');
+  days.forEach(day => {
+    day.addEventListener('touchstart', e => {
+      const target = e.target;
+      if (target.classList.contains('note-card')) {
+        const dateKey = formatDateKey(
+          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+        );
+        const text = target.textContent;
 
-  calendarEl.addEventListener('touchstart', e => {
-    const target = e.target;
-    if (target.classList.contains('note-card')) {
-      const day = target.closest('.day');
-      const dateKey = day.dataset.dateKey;
-      const text = target.textContent;
+        let timer = setTimeout(() => {
+          target.remove();
+          removeAssignmentFromStorage(dateKey, "Note", text);
+        }, 600);
 
-      let timer = setTimeout(() => {
-        target.remove();
-        removeAssignmentFromStorage(dateKey, "Note", text);
-      }, 600);
-
-      target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
-    }
+        target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
+      }
+    });
   });
 }
 
 // Shared helper for adding assignments
 function addAssignment(day, person) {
-  const dateKey = day.dataset.dateKey;
+  const dateKey = formatDateKey(
+    new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+  );
 
   // Toggle: if already present, remove it
   const existing = day.querySelector(`.assignment.${person.toLowerCase()}`);
@@ -373,13 +354,6 @@ function addAssignment(day, person) {
   }
 
   const assignment = createAssignmentElement(dateKey, person);
-
-  // Make calendar assignments draggable too
-  assignment.draggable = true;
-  assignment.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', assignment.dataset.person);
-  });
-
   day.appendChild(assignment);
   addAssignmentToStorage(dateKey, person, assignment.textContent);
 }
@@ -403,6 +377,7 @@ function removeAssignmentFromStorage(dateKey, person, text = null) {
   saveCustomAssignments(custom);
 }
 
+
 /* -----------------------------
    Navigation + Print
 ------------------------------ */
@@ -412,11 +387,7 @@ document.getElementById("prev").addEventListener("click", () => {
     currentMonth = 11;
     currentYear--;
   }
-  buildCalendar(
-    currentYear,
-    currentMonth,
-    JSON.parse(localStorage.getItem("shiftData") || "{}")
-  );
+  buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
 });
 
 document.getElementById("next").addEventListener("click", () => {
@@ -425,38 +396,37 @@ document.getElementById("next").addEventListener("click", () => {
     currentMonth = 0;
     currentYear++;
   }
-  buildCalendar(
-    currentYear,
-    currentMonth,
-    JSON.parse(localStorage.getItem("shiftData") || "{}")
-  );
+  buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
 });
 
 document.getElementById("print").addEventListener("click", () => {
   window.print();
 });
 
-/* -----------------------------
-   Initialization
------------------------------- */
+/* ========================================================================== */
+/*                               Initialization                               */
+/* ========================================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Draw a blank calendar immediately
-  buildCalendar(currentYear, currentMonth, {});
-
-  // 2. Show spinner overlay while fetching
-  if (overlay) overlay.style.display = "flex";  // use flex for centering
+  overlay.style.display = "block";
 
   try {
+    // Fetch fresh shift data
     const data = await fetchShiftData();
+
     if (data && Object.keys(data).length > 0) {
+      // Save to localStorage for navigation buttons
       localStorage.setItem("shiftData", JSON.stringify(data));
-      // 3. Rebuild calendar with real data
+
+      // Build the calendar immediately with real data
       buildCalendar(currentYear, currentMonth, data);
+    } else {
+      // Fallback if no data returned
+      buildCalendar(currentYear, currentMonth, {});
     }
   } catch (err) {
     console.error("Error during initialization:", err);
+    buildCalendar(currentYear, currentMonth, {});
   } finally {
-    // 4. Hide overlay when done
-    if (overlay) overlay.style.display = "none";
+    overlay.style.display = "none";
   }
 });
