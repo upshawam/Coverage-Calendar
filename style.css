@@ -7,21 +7,6 @@ body {
   padding: 0;
 }
 
-#loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #fff8c4;
-  color: #333;
-  text-align: center;
-  padding: 8px;
-  font-size: 0.9em;
-  border-bottom: 1px solid #ccc;
-  z-index: 1000;
-  display: none;
-}
-
 /* ========================================================================== */
 /*                                Header Layout                               */
 /* ========================================================================== */
@@ -129,7 +114,10 @@ body {
   font-weight: normal;
 }
 .day.other-month {
-  background: #f9f9f9; /* optional subtle background */
+  background: #f9f9f9; /* subtle background */
+}
+.day.other-month .assignment {
+  opacity: 0.6; /* lighter assignments */
 }
 
 /* ========================================================================== */
@@ -326,3 +314,54 @@ body {
     font-size: 2em;
   }
 }
+
+/* ========================================================================== */
+/*                           Loading Overlay + Spinner                        */
+/* ========================================================================== */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.6); /* light tint */
+  display: none; /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+
+.loading-box {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #333;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #ccc;
+  border-top: 5px solid #0078d7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
