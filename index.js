@@ -6,7 +6,8 @@ const today = new Date();
 let currentYear = today.getFullYear();
 let currentMonth = today.getMonth();
 
-const overlay = document.getElementById("loading-overlay");
+// don't query the overlay until DOM is ready
+let overlay = null;
 const titleEl = document.getElementById("title");
 let selectedPerson = null;
 
@@ -77,7 +78,6 @@ async function loadShiftsAndBuild(year, month) {
   const data = await fetchShiftData();
   buildCalendar(year, month, data);
 }
-
 
 /* -----------------------------
    Holiday Helpers
@@ -184,7 +184,7 @@ function buildCalendar(year, month, shiftData) {
     // Holidays
     if (holidays[dateKey]) {
       const holidayEl = document.createElement("div");
-      holidayEl.className = "holiday-label";
+      holidayEl.classList.add("holiday-label");
       holidayEl.textContent = holidays[dateKey];
       cell.appendChild(holidayEl);
     }
@@ -407,7 +407,9 @@ document.getElementById("print").addEventListener("click", () => {
 /*                               Initialization                               */
 /* ========================================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-  overlay.style.display = "block";
+  // lookup overlay after DOM is ready and guard its use
+  overlay = document.getElementById("loading-overlay");
+  if (overlay) overlay.hidden = false;
 
   try {
     // Fetch fresh shift data
@@ -427,6 +429,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error during initialization:", err);
     buildCalendar(currentYear, currentMonth, {});
   } finally {
-    overlay.style.display = "none";
+    if (overlay) overlay.hidden = true;
   }
 });
