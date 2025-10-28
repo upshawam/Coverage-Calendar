@@ -6,8 +6,7 @@ const today = new Date();
 let currentYear = today.getFullYear();
 let currentMonth = today.getMonth();
 
-// don't query the overlay until DOM is ready
-let overlay = null;
+const overlay = document.getElementById("loading-overlay");
 const titleEl = document.getElementById("title");
 let selectedPerson = null;
 
@@ -148,6 +147,12 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = dayNum;
     cell.appendChild(num);
 
+    // store the actual date represented by this cell and map it
+    const prevDate = new Date(year, month - 1, dayNum);
+    const prevDateKey = formatDateKey(prevDate);
+    cell.dataset.date = prevDateKey;
+    cellMap.set(prevDateKey, cell);
+
     calendarEl.appendChild(cell);
   }
 
@@ -165,6 +170,8 @@ function buildCalendar(year, month, shiftData) {
     cell.appendChild(num);
 
     const dateKey = formatDateKey(date);
+    // store the actual date for this cell (used when assigning/removing)
+    cell.dataset.date = dateKey;
     cellMap.set(dateKey, cell);
 
     // Shifts
@@ -184,7 +191,7 @@ function buildCalendar(year, month, shiftData) {
     // Holidays
     if (holidays[dateKey]) {
       const holidayEl = document.createElement("div");
-      holidayEl.classList.add("holiday-label");
+      holidayEl.className = "holiday-label";
       holidayEl.textContent = holidays[dateKey];
       cell.appendChild(holidayEl);
     }
@@ -204,6 +211,12 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = d;
     cell.appendChild(num);
 
+    // store the actual date represented by this cell and map it
+    const nextDate = new Date(year, month + 1, d);
+    const nextDateKey = formatDateKey(nextDate);
+    cell.dataset.date = nextDateKey;
+    cellMap.set(nextDateKey, cell);
+
     calendarEl.appendChild(cell);
   }
 
@@ -214,6 +227,8 @@ function buildCalendar(year, month, shiftData) {
     if (cell) {
       items.forEach(item => {
         const assignment = createAssignmentElement(dateKey, item.person, item.text);
+        // ensure dataset dateKey set on the element
+        assignment.dataset.dateKey = dateKey;
         cell.appendChild(assignment);
       });
     }
@@ -222,7 +237,6 @@ function buildCalendar(year, month, shiftData) {
   enableInteractions("ontouchstart" in window);
 }
 
-
 /* -----------------------------
    Assignment Element Factory
 ------------------------------ */
@@ -230,13 +244,25 @@ function createAssignmentElement(dateKey, person, text = null) {
   const assignment = document.createElement("div");
   assignment.classList.add("assignment", person.toLowerCase());
 
+  // metadata for drag/drop & persistence
+  assignment.dataset.person = person;
+  assignment.dataset.dateKey = dateKey;
+  assignment.id = 'assignment-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
+  assignment.draggable = true;
+
+  // dragging an existing assignment carries its id so drop can move it
+  assignment.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: assignment.id }));
+  });
+
   if (person === "Note") {
     assignment.classList.add("note-card");
     assignment.contentEditable = "true";
     assignment.textContent = text || "";
     let oldText = assignment.textContent;
     assignment.addEventListener("input", () => {
-      updateNoteText(dateKey, oldText, assignment.textContent);
+      // use dataset.dateKey so edits after moving persist correctly
+      updateNoteText(assignment.dataset.dateKey, oldText, assignment.textContent);
       oldText = assignment.textContent;
     });
   } else {
@@ -262,9 +288,10 @@ function enableDragAndDrop() {
   const trayCards = document.querySelectorAll('#tray .assignment');
   const days = document.querySelectorAll('.day');
 
+  // tray cards now send a JSON payload so drop handler can distinguish creation vs move
   trayCards.forEach(card => {
     card.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', card.dataset.person);
+      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'tray', person: card.dataset.person }));
     });
   });
 
@@ -272,8 +299,48 @@ function enableDragAndDrop() {
     day.addEventListener('dragover', e => e.preventDefault());
     day.addEventListener('drop', e => {
       e.preventDefault();
-      const person = e.dataTransfer.getData('text/plain');
-      if (person) addAssignment(day, person);
+      const raw = e.dataTransfer.getData('text/plain');
+      if (!raw) return;
+
+      let payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch (err) {
+        // fallback to old plain-person payload
+        payload = { type: 'tray', person: raw };
+      }
+
+      if (payload.type === 'tray') {
+        addAssignment(day, payload.person);
+        return;
+      }
+
+      if (payload.type === 'existing') {
+        const el = document.getElementById(payload.id);
+        if (!el) return;
+
+        const oldDay = el.closest('.day');
+        if (!oldDay) return;
+        if (oldDay === day) return;
+
+        // prefer stored data-date on cells so other-month cells keep correct date
+        const oldDateKey = oldDay.dataset.date || formatDateKey(
+          new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10))
+        );
+        const newDateKey = day.dataset.date || formatDateKey(
+          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+        );
+
+        // move DOM node and update its stored dateKey
+        day.appendChild(el);
+        el.dataset.dateKey = newDateKey;
+
+        // determine person/text for persistence
+        const person = el.classList.contains("note-card") ? "Note" : el.textContent;
+        const text = el.classList.contains("note-card") ? el.textContent : null;
+
+        moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
+      }
     });
   });
 }
@@ -304,7 +371,8 @@ function enableDoubleClickRemove() {
     day.addEventListener('dblclick', e => {
       const target = e.target;
       if (target.classList.contains('assignment')) {
-        const dateKey = formatDateKey(
+        // Use the cell's stored date (handles other-month cells correctly)
+        const dateKey = day.dataset.date || formatDateKey(
           new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
         );
         const person = target.classList.contains("note-card") ? "Note" : target.textContent;
@@ -323,7 +391,7 @@ function enableNoteRemoval() {
     day.addEventListener('touchstart', e => {
       const target = e.target;
       if (target.classList.contains('note-card')) {
-        const dateKey = formatDateKey(
+        const dateKey = day.dataset.date || formatDateKey(
           new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
         );
         const text = target.textContent;
@@ -341,7 +409,8 @@ function enableNoteRemoval() {
 
 // Shared helper for adding assignments
 function addAssignment(day, person) {
-  const dateKey = formatDateKey(
+  // Prefer the cell's data-date attribute (correct for other-month filler cells)
+  const dateKey = day.dataset.date || formatDateKey(
     new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
   );
 
@@ -354,6 +423,8 @@ function addAssignment(day, person) {
   }
 
   const assignment = createAssignmentElement(dateKey, person);
+  // ensure dataset dateKey is correct
+  assignment.dataset.dateKey = dateKey;
   day.appendChild(assignment);
   addAssignmentToStorage(dateKey, person, assignment.textContent);
 }
@@ -377,6 +448,50 @@ function removeAssignmentFromStorage(dateKey, person, text = null) {
   saveCustomAssignments(custom);
 }
 
+/* -----------------------------
+   Move persisted assignment helper
+------------------------------ */
+function moveAssignmentInStorage(oldDateKey, newDateKey, person, text = null) {
+  const custom = loadCustomAssignments();
+  if (!custom[oldDateKey]) return;
+
+  let removed = null;
+
+  if (person === "Note" && text !== null) {
+    for (let i = 0; i < custom[oldDateKey].length; i++) {
+      const a = custom[oldDateKey][i];
+      if (a.person === "Note" && a.text === text) {
+        removed = a;
+        custom[oldDateKey].splice(i, 1);
+        break;
+      }
+    }
+  } else {
+    for (let i = 0; i < custom[oldDateKey].length; i++) {
+      const a = custom[oldDateKey][i];
+      if (a.person === person) {
+        removed = a;
+        custom[oldDateKey].splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  if (custom[oldDateKey] && custom[oldDateKey].length === 0) {
+    delete custom[oldDateKey];
+  }
+
+  if (removed) {
+    if (!custom[newDateKey]) custom[newDateKey] = [];
+    custom[newDateKey].push(removed);
+    saveCustomAssignments(custom);
+  } else {
+    // fallback: create an entry on new date if persisted item not found
+    if (!custom[newDateKey]) custom[newDateKey] = [];
+    custom[newDateKey].push({ person, text });
+    saveCustomAssignments(custom);
+  }
+}
 
 /* -----------------------------
    Navigation + Print
@@ -407,9 +522,7 @@ document.getElementById("print").addEventListener("click", () => {
 /*                               Initialization                               */
 /* ========================================================================== */
 document.addEventListener("DOMContentLoaded", async () => {
-  // lookup overlay after DOM is ready and guard its use
-  overlay = document.getElementById("loading-overlay");
-  if (overlay) overlay.hidden = false;
+  overlay.style.display = "block";
 
   try {
     // Fetch fresh shift data
@@ -429,6 +542,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error during initialization:", err);
     buildCalendar(currentYear, currentMonth, {});
   } finally {
-    if (overlay) overlay.hidden = true;
+    overlay.style.display = "none";
   }
 });
