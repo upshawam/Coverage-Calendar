@@ -1,6 +1,15 @@
+/* Full index.js — calendar rendering + K Work/Off toggle
+   Uses compact JSON from SHEETS_URL: shiftData[yyyy-MM-dd] = [{ person, category }, ...]
+   Toggle logic: Kristin entries are filtered by selected mode:
+     - work mode: show only Kristin working categories (K-Work, K-Weekend, K-NORA, K-Neuro, etc.)
+     - off mode : show only off categories (K-Off, K-PTO/Vacation). PTO is treated as off.
+   The toggle is a switch (checkbox) in the header and persists in localStorage.
+*/
+
 /* -----------------------------
-   Constants / Globals
+   Config / Globals
 ------------------------------ */
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwUYXXAHy_QK8EgY3SHYPnjERllTJu37XnROzS-H4d0_VqE9_1aMQ6SbzlRt6PsDkTf/exec";
 
 const today = new Date();
 let currentYear = today.getFullYear();
@@ -8,79 +17,96 @@ let currentMonth = today.getMonth();
 
 const overlay = document.getElementById("loading-overlay");
 const titleEl = document.getElementById("title");
-let selectedPerson = null;
+let selectedPerson = null; // for tap-to-assign
+
+let kViewMode = localStorage.getItem("kViewMode") || "work";
 
 /* -----------------------------
    Persistence Helpers
 ------------------------------ */
 function loadCustomAssignments() {
-  return JSON.parse(localStorage.getItem("customAssignments") || "{}");
+  try { return JSON.parse(localStorage.getItem("customAssignments") || "{}"); }
+  catch (e) { return {}; }
 }
-function saveCustomAssignments(assignments) {
-  localStorage.setItem("customAssignments", JSON.stringify(assignments));
-}
+function saveCustomAssignments(assignments) { localStorage.setItem("customAssignments", JSON.stringify(assignments)); }
 function addAssignmentToStorage(dateKey, person, text = null) {
   const custom = loadCustomAssignments();
   if (!custom[dateKey]) custom[dateKey] = [];
   custom[dateKey].push({ person, text });
   saveCustomAssignments(custom);
 }
+function removeAssignmentFromStorage(dateKey, person, text = null) {
+  const custom = loadCustomAssignments();
+  if (!custom[dateKey]) return;
+  if (person === "Note" && text !== null) {
+    custom[dateKey] = custom[dateKey].filter(a => !(a.person === "Note" && a.text === text));
+  } else {
+    custom[dateKey] = custom[dateKey].filter(a => a.person !== person);
+  }
+  if (custom[dateKey] && custom[dateKey].length === 0) delete custom[dateKey];
+  saveCustomAssignments(custom);
+}
+function moveAssignmentInStorage(oldDateKey, newDateKey, person, text = null) {
+  const custom = loadCustomAssignments();
+  if (!custom[oldDateKey]) return;
+  let removed = null;
+  if (person === "Note" && text !== null) {
+    for (let i = 0; i < custom[oldDateKey].length; i++) {
+      const a = custom[oldDateKey][i];
+      if (a.person === "Note" && a.text === text) { removed = a; custom[oldDateKey].splice(i, 1); break; }
+    }
+  } else {
+    for (let i = 0; i < custom[oldDateKey].length; i++) {
+      const a = custom[oldDateKey][i];
+      if (a.person === person) { removed = a; custom[oldDateKey].splice(i, 1); break; }
+    }
+  }
+  if (custom[oldDateKey] && custom[oldDateKey].length === 0) delete custom[oldDateKey];
+  if (removed) {
+    if (!custom[newDateKey]) custom[newDateKey] = [];
+    custom[newDateKey].push(removed);
+    saveCustomAssignments(custom);
+  } else {
+    if (!custom[newDateKey]) custom[newDateKey] = [];
+    custom[newDateKey].push({ person, text });
+    saveCustomAssignments(custom);
+  }
+}
 function updateNoteText(dateKey, oldText, newText) {
   const custom = loadCustomAssignments();
   if (custom[dateKey]) {
     const note = custom[dateKey].find(a => a.person === "Note" && a.text === oldText);
-    if (note) {
-      note.text = newText;
-      saveCustomAssignments(custom);
-    }
+    if (note) { note.text = newText; saveCustomAssignments(custom); }
   }
 }
 
 /* -----------------------------
-   Data Fetching
+   Fetch shift JSON
 ------------------------------ */
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwUYXXAHy_QK8EgY3SHYPnjERllTJu37XnROzS-H4d0_VqE9_1aMQ6SbzlRt6PsDkTf/exec";
-
 async function fetchShiftData() {
   try {
     const res = await fetch(SHEETS_URL + "?ts=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
-    console.log("Fetched shift data:", data);
-    return data;
+    localStorage.setItem("shiftData", JSON.stringify(data || {}));
+    return data || {};
   } catch (err) {
-    console.error("Error fetching data:", err);
-    return {};
+    console.error("Error fetching shift data:", err);
+    try { return JSON.parse(localStorage.getItem("shiftData") || "{}"); } catch (e) { return {}; }
   }
 }
 
 /* -----------------------------
-   Utils
+   Date / holiday helpers
 ------------------------------ */
-function daysInMonth(year, month) {
-  return new Date(year, month + 1, 0).getDate();
-}
-function getWeekday(year, month, day) {
-  return new Date(year, month, day).getDay();
-}
+function daysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
+function getWeekday(year, month, day) { return new Date(year, month, day).getDay(); }
 function formatDateKey(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 }
-
-/* -----------------------------
-   Data Loading / Build Calendar
------------------------------- */
-async function loadShiftsAndBuild(year, month) {
-  const data = await fetchShiftData();
-  buildCalendar(year, month, data);
-}
-
-/* -----------------------------
-   Holiday Helpers
------------------------------- */
 function nthWeekday(year, month, weekday, n) {
   const first = new Date(year, month, 1);
   const offset = (7 + weekday - first.getDay()) % 7;
@@ -108,149 +134,41 @@ function getUSHolidays(year) {
 }
 
 /* -----------------------------
-   Calendar Rendering
+   Kristin category helpers
 ------------------------------ */
-function buildCalendar(year, month, shiftData) {
-  const calendarEl = document.getElementById("calendar");
-  const weekdayRow = document.getElementById("weekday-row");
-
-  // Clear old content
-  calendarEl.innerHTML = "";
-  weekdayRow.innerHTML = "";
-
-  // Title
-  const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
-  titleEl.textContent = `${monthName} ${year}`;
-
-  // Weekday headers
-  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
-    const div = document.createElement("div");
-    div.textContent = d;
-    weekdayRow.appendChild(div);
-  });
-
-  const numDays = daysInMonth(year, month);
-  const firstDay = getWeekday(year, month, 1);
-  const daysInPrevMonth = daysInMonth(year, month - 1);
-
-  const holidays = getUSHolidays(year);
-  const cellMap = new Map();
-
-  // Fill previous month days
-  for (let i = 0; i < firstDay; i++) {
-    const dayNum = daysInPrevMonth - firstDay + 1 + i;
-    const cell = document.createElement("div");
-    cell.className = "day other-month";
-
-    const num = document.createElement("div");
-    num.className = "day-number";
-    num.textContent = dayNum;
-    cell.appendChild(num);
-
-    // store the actual date represented by this cell and map it
-    const prevDate = new Date(year, month - 1, dayNum);
-    const prevDateKey = formatDateKey(prevDate);
-    cell.dataset.date = prevDateKey;
-    cellMap.set(prevDateKey, cell);
-
-    calendarEl.appendChild(cell);
-  }
-
-  // Fill current month days
-  for (let day = 1; day <= numDays; day++) {
-    const cell = document.createElement("div");
-    cell.className = "day";
-
-    const date = new Date(year, month, day);
-    if (date.getDay() === 0 || date.getDay() === 6) cell.classList.add("weekend");
-
-    const num = document.createElement("div");
-    num.className = "day-number";
-    num.textContent = day;
-    cell.appendChild(num);
-
-    const dateKey = formatDateKey(date);
-    // store the actual date for this cell (used when assigning/removing)
-    cell.dataset.date = dateKey;
-    cellMap.set(dateKey, cell);
-
-    // Shifts
-    const shifts = shiftData[dateKey];
-    if (shifts) {
-      const shiftContainer = document.createElement("div");
-      shiftContainer.className = "shift-container";
-      shifts.forEach(shift => {
-        const label = document.createElement("div");
-        label.className = "shift-label";
-        label.textContent = shift.label;
-        shiftContainer.appendChild(label);
-      });
-      cell.appendChild(shiftContainer);
-    }
-
-    // Holidays
-    if (holidays[dateKey]) {
-      const holidayEl = document.createElement("div");
-      holidayEl.className = "holiday-label";
-      holidayEl.textContent = holidays[dateKey];
-      cell.appendChild(holidayEl);
-    }
-
-    calendarEl.appendChild(cell);
-  }
-
-  // Fill next month days to complete the grid
-  const totalCells = firstDay + numDays;
-  const remaining = (7 - (totalCells % 7)) % 7;
-  for (let d = 1; d <= remaining; d++) {
-    const cell = document.createElement("div");
-    cell.className = "day other-month";
-
-    const num = document.createElement("div");
-    num.className = "day-number";
-    num.textContent = d;
-    cell.appendChild(num);
-
-    // store the actual date represented by this cell and map it
-    const nextDate = new Date(year, month + 1, d);
-    const nextDateKey = formatDateKey(nextDate);
-    cell.dataset.date = nextDateKey;
-    cellMap.set(nextDateKey, cell);
-
-    calendarEl.appendChild(cell);
-  }
-
-  // Reapply saved custom assignments
-  const custom = loadCustomAssignments();
-  Object.entries(custom).forEach(([dateKey, items]) => {
-    const cell = cellMap.get(dateKey);
-    if (cell) {
-      items.forEach(item => {
-        const assignment = createAssignmentElement(dateKey, item.person, item.text);
-        // ensure dataset dateKey set on the element
-        assignment.dataset.dateKey = dateKey;
-        cell.appendChild(assignment);
-      });
-    }
-  });
-
-  enableInteractions("ontouchstart" in window);
+function isKristinWorkingCategory(cat) {
+  if (!cat) return false;
+  const c = String(cat).toLowerCase();
+  return c.indexOf("k-work") !== -1 ||
+         c.indexOf("k-weekend") !== -1 ||
+         c.indexOf("k-nora") !== -1 ||
+         c.indexOf("k-neuro") !== -1 ||
+         c.indexOf("work") !== -1;
+}
+function isKristinPTOCategory(cat) {
+  if (!cat) return false;
+  const c = String(cat).toLowerCase();
+  return c.indexOf("pto") !== -1 || c.indexOf("vacation") !== -1;
+}
+function isKristinOffCategory(cat) {
+  if (!cat) return false;
+  const c = String(cat).toLowerCase();
+  return c.indexOf("k-off") !== -1 || c.indexOf("off") !== -1 || isKristinPTOCategory(cat);
 }
 
 /* -----------------------------
-   Assignment Element Factory
+   Assignment element factory
 ------------------------------ */
 function createAssignmentElement(dateKey, person, text = null) {
   const assignment = document.createElement("div");
   assignment.classList.add("assignment", person.toLowerCase());
-
-  // metadata for drag/drop & persistence
   assignment.dataset.person = person;
   assignment.dataset.dateKey = dateKey;
   assignment.id = 'assignment-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
   assignment.draggable = true;
+  assignment.style.position = assignment.style.position || "relative";
+  assignment.style.zIndex = 2;
 
-  // dragging an existing assignment carries its id so drop can move it
   assignment.addEventListener('dragstart', e => {
     e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: assignment.id }));
   });
@@ -261,7 +179,6 @@ function createAssignmentElement(dateKey, person, text = null) {
     assignment.textContent = text || "";
     let oldText = assignment.textContent;
     assignment.addEventListener("input", () => {
-      // use dataset.dateKey so edits after moving persist correctly
       updateNoteText(assignment.dataset.dateKey, oldText, assignment.textContent);
       oldText = assignment.textContent;
     });
@@ -272,276 +189,358 @@ function createAssignmentElement(dateKey, person, text = null) {
 }
 
 /* -----------------------------
-   Interactions
+   K Toggle UI helpers
 ------------------------------ */
-function enableInteractions(isTouchDevice) {
-  if (isTouchDevice) {
-    enableTapToAssign();
-  } else {
-    enableDragAndDrop();
-    enableDoubleClickRemove();
+function setKToggleFromCheckbox() {
+  const cb = document.getElementById("k-toggle-checkbox");
+  if (!cb) return;
+  kViewMode = cb.checked ? "off" : "work";
+  localStorage.setItem("kViewMode", kViewMode);
+  const label = document.getElementById("k-toggle-label");
+  if (label) label.textContent = cb.checked ? "K: Off" : "K: Work";
+}
+
+/* -----------------------------
+   Calendar rendering (uses compact JSON)
+------------------------------ */
+function buildCalendar(year, month, shiftData) {
+  const calendarEl = document.getElementById("calendar");
+  const weekdayRow = document.getElementById("weekday-row");
+
+  calendarEl.innerHTML = "";
+  weekdayRow.innerHTML = "";
+
+  const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
+  titleEl.textContent = `${monthName} ${year}`;
+
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
+    const div = document.createElement("div");
+    div.textContent = d;
+    weekdayRow.appendChild(div);
+  });
+
+  const numDays = daysInMonth(year, month);
+  const firstDay = getWeekday(year, month, 1);
+  const daysInPrevMonth = daysInMonth(year, month - 1);
+  const holidays = getUSHolidays(year);
+  const cellMap = new Map();
+
+  // prev month filler
+  for (let i = 0; i < firstDay; i++) {
+    const dayNum = daysInPrevMonth - firstDay + 1 + i;
+    const cell = document.createElement("div");
+    cell.className = "day other-month";
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = dayNum;
+    cell.appendChild(num);
+
+    const prevDate = new Date(year, month - 1, dayNum);
+    const prevDateKey = formatDateKey(prevDate);
+    cell.dataset.date = prevDateKey;
+    cellMap.set(prevDateKey, cell);
+    calendarEl.appendChild(cell);
   }
-  enableNoteRemoval();
-}
 
-function enableDragAndDrop() {
-  const trayCards = document.querySelectorAll('#tray .assignment');
-  const days = document.querySelectorAll('.day');
+  // current month
+  for (let day = 1; day <= numDays; day++) {
+    const cell = document.createElement("div");
+    cell.className = "day";
 
-  // tray cards now send a JSON payload so drop handler can distinguish creation vs move
-  trayCards.forEach(card => {
-    card.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'tray', person: card.dataset.person }));
-    });
+    const date = new Date(year, month, day);
+    const isWeekend = (date.getDay() === 0 || date.getDay() === 6);
+    if (isWeekend) cell.classList.add("weekend");
+
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = day;
+    cell.appendChild(num);
+
+    const dateKey = formatDateKey(date);
+    cell.dataset.date = dateKey;
+    cellMap.set(dateKey, cell);
+
+    const shifts = shiftData[dateKey] || [];
+    const kristinEntries = shifts.filter(s => s.person && s.person.toLowerCase() === "kristin");
+    const otherEntries = shifts.filter(s => !(s.person && s.person.toLowerCase() === "kristin"));
+
+    let shiftContainer = null;
+    if (otherEntries.length > 0 || kristinEntries.length > 0) {
+      shiftContainer = document.createElement("div");
+      shiftContainer.className = "shift-container";
+
+      // render others
+      otherEntries.forEach(s => {
+        const label = document.createElement("div");
+        label.className = "shift-label";
+        label.textContent = s.category || "";
+        shiftContainer.appendChild(label);
+      });
+
+      // Kristin: filter by kViewMode
+      if (kristinEntries.length > 0) {
+        if (kViewMode === "work") {
+          // only show working categories
+          kristinEntries.forEach(e => {
+            if (isKristinWorkingCategory(e.category)) {
+              const label = document.createElement("div");
+              label.className = "shift-label k-shift";
+              label.textContent = e.category || "";
+              shiftContainer.appendChild(label);
+            }
+          });
+        } else { // off mode
+          // only show off/PT0 categories
+          kristinEntries.forEach(e => {
+            if (isKristinOffCategory(e.category) || isKristinPTOCategory(e.category)) {
+              const label = document.createElement("div");
+              label.className = "shift-label k-off";
+              label.textContent = e.category || "K-Off";
+              shiftContainer.appendChild(label);
+            }
+          });
+        }
+      } else {
+        // nothing for Kristin on this date (we do not infer)
+      }
+
+      cell.appendChild(shiftContainer);
+    }
+
+    // holiday
+    if (holidays[dateKey]) {
+      const holidayEl = document.createElement("div");
+      holidayEl.className = "holiday-label";
+      holidayEl.textContent = holidays[dateKey];
+      cell.appendChild(holidayEl);
+    }
+
+    calendarEl.appendChild(cell);
+  }
+
+  // next month filler
+  const totalCells = firstDay + numDays;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    const cell = document.createElement("div");
+    cell.className = "day other-month";
+    const num = document.createElement("div");
+    num.className = "day-number";
+    num.textContent = d;
+    cell.appendChild(num);
+
+    const nextDate = new Date(year, month + 1, d);
+    const nextDateKey = formatDateKey(nextDate);
+    cell.dataset.date = nextDateKey;
+    cellMap.set(nextDateKey, cell);
+    calendarEl.appendChild(cell);
+  }
+
+  // custom assignments
+  const custom = loadCustomAssignments();
+  Object.entries(custom).forEach(([dateKey, items]) => {
+    const cell = cellMap.get(dateKey);
+    if (cell) {
+      items.forEach(item => {
+        const assignment = createAssignmentElement(dateKey, item.person, item.text);
+        assignment.dataset.dateKey = dateKey;
+        cell.appendChild(assignment);
+      });
+    }
   });
 
-  days.forEach(day => {
-    day.addEventListener('dragover', e => e.preventDefault());
-    day.addEventListener('drop', e => {
+  enableInteractions("ontouchstart" in window);
+}
+
+/* -----------------------------
+   Interactions (delegated, single init)
+------------------------------ */
+let _interactionsInitialized = false;
+function enableInteractions(isTouchDevice) {
+  if (_interactionsInitialized) return;
+  _interactionsInitialized = true;
+
+  const tray = document.getElementById('tray');
+  const calendarEl = document.getElementById('calendar');
+
+  document.addEventListener('dragstart', e => {
+    const el = e.target;
+    if (!el.classList || !el.classList.contains('assignment')) return;
+    const inTray = !!el.closest('#tray');
+    if (inTray) {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'tray', person: el.dataset.person }));
+    } else {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: el.id }));
+    }
+  });
+
+  calendarEl.addEventListener('dragover', e => { if (e.target.closest('.day')) e.preventDefault(); });
+
+  calendarEl.addEventListener('drop', e => {
+    e.preventDefault();
+    const day = e.target.closest('.day');
+    if (!day) return;
+
+    const raw = e.dataTransfer.getData('text/plain');
+    if (!raw) return;
+    let payload;
+    try { payload = JSON.parse(raw); } catch (err) { payload = { type: 'tray', person: raw }; }
+
+    if (payload.type === 'tray') {
+      addAssignment(day, payload.person);
+      return;
+    }
+    if (payload.type === 'existing') {
+      const el = document.getElementById(payload.id);
+      if (!el) return;
+      const oldDay = el.closest('.day');
+      if (!oldDay || oldDay === day) return;
+
+      const oldDateKey = oldDay.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10)));
+      const newDateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
+
+      day.appendChild(el);
+      el.dataset.dateKey = newDateKey;
+
+      const person = el.classList.contains("note-card") ? "Note" : el.textContent;
+      const text = el.classList.contains("note-card") ? el.textContent : null;
+
+      moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
+    }
+  });
+
+  tray.addEventListener('click', e => {
+    const card = e.target.closest('.assignment');
+    if (!card) return;
+    selectedPerson = card.dataset.person;
+    tray.querySelectorAll('.assignment').forEach(c => c.classList.toggle('active', c === card));
+  });
+
+  calendarEl.addEventListener('click', e => {
+    const day = e.target.closest('.day');
+    if (!day) return;
+    if (!selectedPerson) return;
+    addAssignment(day, selectedPerson);
+  });
+
+  calendarEl.addEventListener('dblclick', e => {
+    const target = e.target.closest('.assignment');
+    if (!target) return;
+    const day = target.closest('.day');
+    if (!day) return;
+    const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
+    const person = target.classList.contains("note-card") ? "Note" : target.textContent;
+    const text = target.classList.contains("note-card") ? target.textContent : null;
+    target.remove();
+    removeAssignmentFromStorage(dateKey, person, text);
+  });
+
+  let lastTap = 0;
+  let longPressTimer = null;
+
+  calendarEl.addEventListener('touchstart', e => {
+    const assignmentEl = e.target.closest('.assignment');
+    if (!assignmentEl) return;
+    const day = assignmentEl.closest('.day');
+    if (!day) return;
+
+    if (assignmentEl.classList.contains('note-card')) {
+      longPressTimer = setTimeout(() => {
+        const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
+        const text = assignmentEl.textContent;
+        assignmentEl.remove();
+        removeAssignmentFromStorage(dateKey, "Note", text);
+      }, 600);
+    }
+
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      lastTap = 0;
+      const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
+      const person = assignmentEl.classList.contains("note-card") ? "Note" : assignmentEl.textContent;
+      const text = assignmentEl.classList.contains("note-card") ? assignmentEl.textContent : null;
+      assignmentEl.remove();
+      removeAssignmentFromStorage(dateKey, person, text);
       e.preventDefault();
-      const raw = e.dataTransfer.getData('text/plain');
-      if (!raw) return;
+    } else {
+      lastTap = now;
+    }
+  }, { passive: true });
 
-      let payload;
-      try {
-        payload = JSON.parse(raw);
-      } catch (err) {
-        // fallback to old plain-person payload
-        payload = { type: 'tray', person: raw };
-      }
-
-      if (payload.type === 'tray') {
-        addAssignment(day, payload.person);
-        return;
-      }
-
-      if (payload.type === 'existing') {
-        const el = document.getElementById(payload.id);
-        if (!el) return;
-
-        const oldDay = el.closest('.day');
-        if (!oldDay) return;
-        if (oldDay === day) return;
-
-        // prefer stored data-date on cells so other-month cells keep correct date
-        const oldDateKey = oldDay.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10))
-        );
-        const newDateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
-
-        // move DOM node and update its stored dateKey
-        day.appendChild(el);
-        el.dataset.dateKey = newDateKey;
-
-        // determine person/text for persistence
-        const person = el.classList.contains("note-card") ? "Note" : el.textContent;
-        const text = el.classList.contains("note-card") ? el.textContent : null;
-
-        moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
-      }
-    });
-  });
+  calendarEl.addEventListener('touchend', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
 }
 
-function enableTapToAssign() {
-  const trayCards = document.querySelectorAll('#tray .assignment');
-  const days = document.querySelectorAll('.day');
-
-  trayCards.forEach(card => {
-    card.addEventListener('click', () => {
-      selectedPerson = card.dataset.person;
-      trayCards.forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-    });
-  });
-
-  days.forEach(day => {
-    day.addEventListener('click', () => {
-      if (!selectedPerson) return;
-      addAssignment(day, selectedPerson);
-    });
-  });
-}
-
-function enableDoubleClickRemove() {
-  const days = document.querySelectorAll('.day');
-  days.forEach(day => {
-    day.addEventListener('dblclick', e => {
-      const target = e.target;
-      if (target.classList.contains('assignment')) {
-        // Use the cell's stored date (handles other-month cells correctly)
-        const dateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
-        const person = target.classList.contains("note-card") ? "Note" : target.textContent;
-        const text = target.classList.contains("note-card") ? target.textContent : null;
-
-        target.remove();
-        removeAssignmentFromStorage(dateKey, person, text);
-      }
-    });
-  });
-}
-
-function enableNoteRemoval() {
-  const days = document.querySelectorAll('.day');
-  days.forEach(day => {
-    day.addEventListener('touchstart', e => {
-      const target = e.target;
-      if (target.classList.contains('note-card')) {
-        const dateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
-        const text = target.textContent;
-
-        let timer = setTimeout(() => {
-          target.remove();
-          removeAssignmentFromStorage(dateKey, "Note", text);
-        }, 600);
-
-        target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
-      }
-    });
-  });
-}
-
-// Shared helper for adding assignments
+/* -----------------------------
+   Add / remove assignment helpers
+------------------------------ */
 function addAssignment(day, person) {
-  // Prefer the cell's data-date attribute (correct for other-month filler cells)
-  const dateKey = day.dataset.date || formatDateKey(
-    new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-  );
-
-  // Toggle: if already present, remove it
+  const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
   const existing = day.querySelector(`.assignment.${person.toLowerCase()}`);
   if (existing) {
     existing.remove();
     removeAssignmentFromStorage(dateKey, person, existing.textContent);
     return;
   }
-
   const assignment = createAssignmentElement(dateKey, person);
-  // ensure dataset dateKey is correct
   assignment.dataset.dateKey = dateKey;
   day.appendChild(assignment);
   addAssignmentToStorage(dateKey, person, assignment.textContent);
 }
 
 /* -----------------------------
-   Persistence Removal Helper
------------------------------- */
-function removeAssignmentFromStorage(dateKey, person, text = null) {
-  const custom = loadCustomAssignments();
-  if (!custom[dateKey]) return;
-
-  if (person === "Note" && text !== null) {
-    custom[dateKey] = custom[dateKey].filter(a => !(a.person === "Note" && a.text === text));
-  } else {
-    custom[dateKey] = custom[dateKey].filter(a => a.person !== person);
-  }
-
-  if (custom[dateKey].length === 0) {
-    delete custom[dateKey];
-  }
-  saveCustomAssignments(custom);
-}
-
-/* -----------------------------
-   Move persisted assignment helper
------------------------------- */
-function moveAssignmentInStorage(oldDateKey, newDateKey, person, text = null) {
-  const custom = loadCustomAssignments();
-  if (!custom[oldDateKey]) return;
-
-  let removed = null;
-
-  if (person === "Note" && text !== null) {
-    for (let i = 0; i < custom[oldDateKey].length; i++) {
-      const a = custom[oldDateKey][i];
-      if (a.person === "Note" && a.text === text) {
-        removed = a;
-        custom[oldDateKey].splice(i, 1);
-        break;
-      }
-    }
-  } else {
-    for (let i = 0; i < custom[oldDateKey].length; i++) {
-      const a = custom[oldDateKey][i];
-      if (a.person === person) {
-        removed = a;
-        custom[oldDateKey].splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  if (custom[oldDateKey] && custom[oldDateKey].length === 0) {
-    delete custom[oldDateKey];
-  }
-
-  if (removed) {
-    if (!custom[newDateKey]) custom[newDateKey] = [];
-    custom[newDateKey].push(removed);
-    saveCustomAssignments(custom);
-  } else {
-    // fallback: create an entry on new date if persisted item not found
-    if (!custom[newDateKey]) custom[newDateKey] = [];
-    custom[newDateKey].push({ person, text });
-    saveCustomAssignments(custom);
-  }
-}
-
-/* -----------------------------
    Navigation + Print
 ------------------------------ */
-document.getElementById("prev").addEventListener("click", () => {
+function goToPrev() {
   currentMonth--;
-  if (currentMonth < 0) {
-    currentMonth = 11;
-    currentYear--;
-  }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
-});
-
-document.getElementById("next").addEventListener("click", () => {
+}
+function goToNext() {
   currentMonth++;
-  if (currentMonth > 11) {
-    currentMonth = 0;
-    currentYear++;
-  }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
   buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
-});
+}
 
-document.getElementById("print").addEventListener("click", () => {
-  window.print();
-});
-
-/* ========================================================================== */
-/*                               Initialization                               */
-/* ========================================================================== */
+/* -----------------------------
+   Initialization
+------------------------------ */
 document.addEventListener("DOMContentLoaded", async () => {
-  overlay.style.display = "block";
+  const prevBtn = document.getElementById("prev");
+  const nextBtn = document.getElementById("next");
+  const printBtn = document.getElementById("print");
+  const kCheckbox = document.getElementById("k-toggle-checkbox");
+  const kLabel = document.getElementById("k-toggle-label");
 
-  try {
-    // Fetch fresh shift data
-    const data = await fetchShiftData();
+  if (prevBtn) prevBtn.addEventListener("click", goToPrev);
+  if (nextBtn) nextBtn.addEventListener("click", goToNext);
+  if (printBtn) printBtn.addEventListener("click", () => window.print());
 
-    if (data && Object.keys(data).length > 0) {
-      // Save to localStorage for navigation buttons
-      localStorage.setItem("shiftData", JSON.stringify(data));
-
-      // Build the calendar immediately with real data
+  // initialize K toggle checkbox from localStorage
+  if (kCheckbox) {
+    kCheckbox.checked = (localStorage.getItem("kViewMode") === "off");
+    setKToggleFromCheckbox();
+    kCheckbox.addEventListener("change", () => {
+      setKToggleFromCheckbox();
+      // rebuild using cached shift data
+      const data = JSON.parse(localStorage.getItem("shiftData") || "{}");
       buildCalendar(currentYear, currentMonth, data);
-    } else {
-      // Fallback if no data returned
-      buildCalendar(currentYear, currentMonth, {});
-    }
+    });
+  }
+
+  if (kLabel) {
+    // ensure label reflects state
+    kLabel.textContent = (kCheckbox && kCheckbox.checked) ? "K: Off" : "K: Work";
+  }
+
+  if (overlay) overlay.style.display = "block";
+  try {
+    const data = await fetchShiftData();
+    buildCalendar(currentYear, currentMonth, data || {});
   } catch (err) {
-    console.error("Error during initialization:", err);
-    buildCalendar(currentYear, currentMonth, {});
+    console.error("Initialization error:", err);
+    buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
   } finally {
-    overlay.style.display = "none";
+    if (overlay) overlay.style.display = "none";
   }
 });
