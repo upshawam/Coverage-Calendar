@@ -11,35 +11,82 @@ body {
   color: #222;
 }
 
+/* Visually-hidden helper for accessibility */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0; padding: 0; margin: -1px;
+}
+
 /* ========================================================================== */
 /*                                Header Layout                               */
 /* ========================================================================== */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   max-width: 1100px;
-  margin: 0 auto 20px auto;
-  gap: 20px;
-  padding: 8px;
+  margin: 8px auto 12px auto;
+  gap: 16px;
+  padding: 6px 8px;
   box-sizing: border-box;
   width: 100%;
 }
-.header-left { flex: 1; }
 
-.nav-top {
+/* Left side stacks title above prev/next */
+.header-left {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
-/* K Toggle switch wrapper */
+/* Title */
+#title, .title {
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1.9em;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Prev/Next below title */
+.nav-bottom {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.nav-bottom button {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.92em;
+}
+
+/* Right side controls */
+.header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.header-right #print {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.92em;
+}
 .k-toggle-wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: 6px;
   font-size: 0.95em;
   color: #333;
 }
@@ -75,84 +122,38 @@ body {
   transition: transform 0.18s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.12);
 }
-.switch input:checked + .slider {
-  background: #0078d7;
-}
-.switch input:checked + .slider:before {
-  transform: translateX(20px);
-}
+.switch input:checked + .slider { background: #0078d7; }
+.switch input:checked + .slider:before { transform: translateX(20px); }
 
-/* Title */
-#title {
-  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 2.6em;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin: 0;
-  color: #222;
+/* ========================================================================== */
+/*                              Error banner                                  */
+/* ========================================================================== */
+.error-banner {
+  max-width: 900px;
+  margin: 6px auto;
+  padding: 8px 12px;
+  border: 1px solid #e5a1a1;
+  background: #fff2f2;
+  color: #7a1d1d;
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
 }
-
-.nav-bottom { display: flex; gap: 12px; margin-top: 6px; }
-
-.nav-top button,
-.nav-bottom button {
-  background: #eee;
-  border: 1px solid #ccc;
-  padding: 6px 10px;
+.error-btn {
+  margin-left: 8px;
+  background: #fff;
+  border: 1px solid #e0b4b4;
+  padding: 6px 8px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95em;
-}
-
-/* Right column: tray */
-.header-right { width: 220px; box-sizing: border-box; }
-.tray-box { border: 1px solid #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
-.tray-title { font-weight: bold; text-align: center; margin-bottom: 6px; }
-.tray-hint { font-size: 0.78em; color: #666; text-align: center; margin-top: 8px; }
-
-.header-right .card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: stretch;
-  margin: 0;
+  font-size: 0.9em;
 }
 
 /* ========================================================================== */
-/*                              Assignment Cards                              */
-/* ========================================================================== */
-.assignment {
-  border-radius: 6px;
-  font-size: 0.92em;
-  margin: 4px 0;
-  padding: 6px 8px;
-  display: inline-block;
-  user-select: none;
-  -webkit-user-select: none;
-  position: relative;
-  z-index: 2;
-}
-
-.card-container .assignment {
-  margin: 0 6px;
-  padding: 8px 10px;
-  font-weight: 700;
-  cursor: grab;
-  white-space: normal;
-}
-
-.assignment.nonnie,
-.card-container .assignment.nonnie { background: #c8e6c9; color: #000; }
-.assignment.sophia,
-.card-container .assignment.sophia { background: #bbdefb; color: #000; }
-.assignment.note-card,
-.card-container .note-card { background: #fff9c4; border: 1px solid #f0e68c; color: #222; }
-
-/* calendar note card */
-.calendar .note-card { display: block; width: 100%; padding: 6px 8px; border-radius: 6px; font-size: 0.88em; }
-
-/* ========================================================================== */
-/*                              Calendar Layout                               */
+/*                              Assignment / Calendar                         */
 /* ========================================================================== */
 .weekday-row {
   display: grid;
@@ -175,86 +176,212 @@ body {
   gap: 0;
   box-sizing: border-box;
   -webkit-user-select: none;
+  grid-auto-rows: minmax(120px, auto);
 }
 
 .day {
   border: 1px solid #ccc;
-  min-height: 100px;
+  min-height: 120px;
   padding: 8px;
   position: relative;
   box-sizing: border-box;
   min-width: 0;
   background: #fff;
-  padding-bottom: 36px; /* space for shift labels */
+  padding-bottom: 48px;
 }
 
+.day.other-month .day-number {
+  color: #9aa4ad;
+  opacity: 0.8;
+  font-weight: 600;
+}
 .day-number { font-weight: 700; font-size: 0.95em; }
-.day.weekend { background: #e6f0ff; }
+.day.weekend { background: #eef6ff; }
 
-/* ========================================================================== */
-/*                               Shift Labels                                 */
-/* ========================================================================== */
+/* subdued add button */
+.add-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.03);
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.12s ease, transform 0.06s ease, opacity 0.12s ease;
+  opacity: 0.95;
+}
+.add-btn:hover { background: rgba(0,0,0,0.05); opacity: 1; }
+.add-btn:active { transform: translateY(1px); }
+
+/* shift container (imported JSON) positioned bottom-left */
 .shift-container {
   position: absolute;
-  bottom: 6px;
-  right: 6px;
-  left: auto;
+  bottom: 8px;
+  left: 8px;
+  right: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   gap: 4px;
-  max-width: calc(100% - 12px);
-  pointer-events: none;
+  align-items: flex-start;
+  max-height: 64px;
+  overflow: hidden;
+  pointer-events: auto;
   z-index: 0;
 }
+.shift-container.expanded { max-height: none; overflow: visible; }
+
 .shift-label {
+  font-size: 0.68em;
+  font-weight: 400;
+  color: #555;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.shift-label.k-off { font-style: italic; color: #666; }
+.shift-label.k-shift { color: #444; font-weight: 400; }
+
+.shift-label.more-label {
+  background: rgba(0,0,0,0.06);
+  padding: 3px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
   font-size: 0.72em;
-  font-weight: 600;
-  color: rgba(0,0,0,0.7);
-  background: rgba(255,255,255,0.85);
-  padding: 2px 6px;
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* assignments (Nonnie/Sophia/Note) */
+.assignment {
+  border-radius: 6px;
+  font-size: 0.9em;
+  margin: 4px 0;
+  padding: 6px 8px;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  z-index: 2;
+  line-height: 1.05;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.shift-label.k-off { font-style: italic; color: #444; background: rgba(245,245,245,0.95); }
-.shift-label.k-shift { font-weight: 700; color: #111; background: rgba(235,245,255,0.95); }
+.assignment.nonnie { background: #c8e6c9; color: #000; font-weight: 800; }
+.assignment.sophia { background: #bbdefb; color: #000; font-weight: 800; }
+.assignment.note-card { background: #fff9c4; border: 1px solid #f0e68c; color: #222; }
+.assignment.hidden-assignment { display: none; }
+.day.expanded .assignment.hidden-assignment { display: block; }
 
-/* holiday */
-.holiday-label { font-size: 0.75em; color: #666; margin-top: 6px; }
+/* ========================================================================== */
+/*                              Day menu (popover)                            */
+/* ========================================================================== */
+.day-menu {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  z-index: 10000;
+  min-width: 200px;
+  transform-origin: top left;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+.day-menu[aria-hidden="false"] { opacity: 1; pointer-events: auto; transform: scale(1); }
+.day-menu .menu-btn {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.day-menu .menu-btn:hover { background: #f5f5f5; }
+.day-menu .menu-btn.nonnie { color: #0b7a0b; font-weight: 800; }
+.day-menu .menu-btn.sophia { color: #0b57a6; font-weight: 800; }
+.day-menu .menu-btn.note-card { color: #a07400; font-weight: 700; }
+.day-menu .menu-btn.cancel { color: #666; font-weight: 600; }
+
+/* note editor form */
+.note-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#note-input {
+  min-width: 180px;
+  max-width: 360px;
+  font-size: 0.95em;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.note-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.note-form .menu-btn.save {
+  background: #0078d7;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+.note-form .menu-btn.cancel {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
 /* ========================================================================== */
 /*                                Print Styles                                */
 /* ========================================================================== */
 @media print {
+  .nav-bottom { display: none !important; }
+  .add-btn, .day-menu, .header-right { display: none !important; }
   body { background: white; }
   .assignment { cursor: default; }
-  .card-container, .nav button, .tray-box { display: none; }
-  #title { display: block; text-align: center; margin-top: 25px; margin-bottom: 15px; font-size: 2.2em; }
+  #title { display: block; text-align: center; margin-top: 6px; margin-bottom: 12px; font-size: 2.2em; }
 }
 
 /* ========================================================================== */
 /*                           Mobile Responsive                                */
 /* ========================================================================== */
 @media (max-width: 700px) {
-  .header { flex-direction: column; align-items: stretch; gap: 12px; padding: 10px; }
-  .header-right { width: 100%; margin-top: 0; order: 3; }
-  #title { font-size: 1.8em; text-align: left; word-break: break-word; }
-  .nav-top { justify-content: flex-start; }
-
-  .card-container { flex-direction: row; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
-  .card-container .assignment { min-width: 110px; max-width: 160px; cursor: pointer; flex: 0 0 auto; }
-
-  .weekday-row, .calendar { max-width: 100%; margin: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
-  .weekday-row { display: grid; grid-template-columns: repeat(7, 110px); justify-content: start; }
-  .calendar { display: grid; grid-template-columns: repeat(7, 110px); grid-auto-rows: minmax(90px, auto); gap: 0; justify-content: start; }
-
-  .day { min-height: 90px; padding: 8px; padding-bottom: 34px; box-sizing: border-box; }
-  .day-number { font-size: 1em; }
-  .shift-container { position: static; margin-top: 6px; gap: 6px; pointer-events: none; align-items: flex-start; }
-  .shift-label { font-size: 0.78em; padding: 3px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header { flex-direction: column; align-items: stretch; margin: 8px auto 12px auto; gap: 8px; padding: 8px; }
+  .header-left { width: 100%; }
+  #title { font-size: 1.6em; }
+  .header-right { justify-content: flex-start; }
+  .nav-bottom { margin-top: 0; }
+  .day-menu { min-width: 160px; }
+  #note-input { min-width: 140px; }
 }
 
 /* ========================================================================== */
@@ -264,7 +391,6 @@ body {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(255,255,255,0.6); display: none; align-items: center; justify-content: center; z-index: 9999;
 }
-.loading-box { background: #fff; padding: 18px 24px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 15px; color: #333; animation: fadeIn 0.22s ease; }
+.loading-box { background: #fff; padding: 18px 24px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 15px; }
 .spinner { width: 36px; height: 36px; border: 5px solid #e0e0e0; border-top: 5px solid #0078d7; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
