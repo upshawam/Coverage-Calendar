@@ -15,24 +15,16 @@
     </div>
   </div>
 
+  <!-- Lightweight error banner (hidden until needed) -->
+  <div id="error-banner" class="error-banner" aria-hidden="true" role="alert" style="display:none;">
+    <span id="error-banner-text"></span>
+    <button id="error-retry" class="error-btn">Retry</button>
+    <button id="error-dismiss" class="error-btn">Dismiss</button>
+  </div>
+
   <div class="header">
     <div class="header-left">
-      <div class="nav-top">
-        <button id="print">🖨 Print</button>
-
-        <!-- K toggle switch -->
-        <div class="k-toggle-wrapper" title="Toggle Kristin view">
-          <label class="switch" for="k-toggle-checkbox">
-            <input id="k-toggle-checkbox" type="checkbox" />
-            <span class="slider"></span>
-          </label>
-          <span id="k-toggle-label">K: Work</span>
-        </div>
-      </div>
-
-      <div class="nav-middle">
-        <span id="title"></span>
-      </div>
+      <div id="title" class="title"></div>
 
       <div class="nav-bottom">
         <button id="prev">◀ Prev</button>
@@ -41,16 +33,15 @@
     </div>
 
     <div class="header-right">
-      <div class="tray-box">
-        <div class="tray-title">Drag/Drop</div>
+      <button id="print">🖨 Print</button>
 
-        <div class="card-container" id="tray">
-          <div class="assignment nonnie" draggable="true" data-person="Nonnie">Nonnie</div>
-          <div class="assignment sophia" draggable="true" data-person="Sophia">Sophia</div>
-          <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
-        </div>
-
-        <div class="tray-hint">(Tap to select, double‑tap or double‑click an assignment to remove)</div>
+      <!-- K toggle switch -->
+      <div class="k-toggle-wrapper" title="Toggle Kristin view">
+        <label class="switch" for="k-toggle-checkbox">
+          <input id="k-toggle-checkbox" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+        <span id="k-toggle-label">K: Work</span>
       </div>
     </div>
   </div>
@@ -60,6 +51,26 @@
 
   <!-- Calendar grid -->
   <div class="calendar" id="calendar"></div>
+
+  <!-- Day menu (floating; contains both quick buttons and inline note editor) -->
+  <div id="day-menu" class="day-menu" aria-hidden="true">
+    <div id="day-menu-buttons" class="day-menu-buttons">
+      <button data-person="Nonnie" class="menu-btn nonnie">Nonnie</button>
+      <button data-person="Sophia" class="menu-btn sophia">Sophia</button>
+      <button data-person="Note" class="menu-btn note-card">Add Note…</button>
+      <button data-action="cancel" class="menu-btn cancel">Cancel</button>
+    </div>
+
+    <!-- Note editor (hidden until user selects Add Note) -->
+    <form id="note-form" class="note-form" style="display:none;" onsubmit="return false;">
+      <label for="note-input" class="visually-hidden">Note text</label>
+      <textarea id="note-input" rows="3" placeholder="Enter note text"></textarea>
+      <div class="note-form-actions">
+        <button id="note-save" type="button" class="menu-btn save">Save</button>
+        <button id="note-cancel" type="button" class="menu-btn cancel">Cancel</button>
+      </div>
+    </form>
+  </div>
 
   <script src="index.js"></script>
 </body>
