@@ -39,7 +39,7 @@ function updateNoteText(dateKey, oldText, newText) {
 /* -----------------------------
    Data Fetching
 ------------------------------ */
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbzqz3OCakG5SaWsGjUlLTQyGb3uGVYKyQ938SLrXb-i4w_1--pSyKc-h0jgMGHQ1L_Q/exec";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwUYXXAHy_QK8EgY3SHYPnjERllTJu37XnROzS-H4d0_VqE9_1aMQ6SbzlRt6PsDkTf/exec";
 
 async function fetchShiftData() {
   try {
