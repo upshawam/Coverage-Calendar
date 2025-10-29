@@ -352,6 +352,88 @@ function createAddButton(cell) {
 }
 
 /* -----------------------------
+   Auto Coverage Detection
+------------------------------ */
+function detectCoverageIssues(year, month, cellMap, customAssignments) {
+  const numDays = daysInMonth(year, month);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let day = 1; day <= numDays; day++) {
+    const date = new Date(year, month, day);
+    const dateKey = formatDateKey(date);
+    const cell = cellMap.get(dateKey);
+    
+    if (!cell || cell.classList.contains('other-month')) continue;
+    
+    // Skip past dates
+    if (date < today) continue;
+    
+    // Check for custom assignments (Nonnie, Sophia)
+    const assignments = customAssignments[dateKey] || [];
+    const hasNonnie = assignments.some(a => a.person === "Nonnie");
+    const hasSophia = assignments.some(a => a.person === "Sophia");
+    
+    // Skip weekends (Saturday and Sunday)
+    const isWeekend = (date.getDay() === 0 || date.getDay() === 6);
+    
+    // Coverage detection logic
+    if (!isWeekend) {
+      if (!hasNonnie && !hasSophia) {
+        // No coverage on a weekday - critical
+        cell.classList.add('no-coverage');
+        cell.title = 'No coverage assigned';
+      } else if (hasNonnie && hasSophia) {
+        // Both assigned - might be intentional overlap
+        cell.classList.add('double-coverage');
+        cell.title = 'Both Nonnie and Sophia assigned';
+      }
+    }
+  }
+}
+
+/* Helper to update coverage status for a single day */
+function updateDayCoverageStatus(dayEl) {
+  if (!dayEl) return;
+  
+  const dateKey = dayEl.dataset.date;
+  if (!dateKey) return;
+  
+  // Parse the date from dateKey
+  const [year, month, day] = dateKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  
+  // Skip past dates and other-month days
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (date < today || dayEl.classList.contains('other-month')) {
+    return;
+  }
+  
+  // Remove existing coverage classes
+  dayEl.classList.remove('no-coverage', 'double-coverage');
+  dayEl.removeAttribute('title');
+  
+  // Check current assignments
+  const assignments = Array.from(dayEl.querySelectorAll('.assignment:not(.note-card)'));
+  const hasNonnie = assignments.some(a => a.textContent.trim() === "Nonnie");
+  const hasSophia = assignments.some(a => a.textContent.trim() === "Sophia");
+  
+  // Skip weekends
+  const isWeekend = (date.getDay() === 0 || date.getDay() === 6);
+  
+  if (!isWeekend) {
+    if (!hasNonnie && !hasSophia) {
+      dayEl.classList.add('no-coverage');
+      dayEl.title = 'No coverage assigned';
+    } else if (hasNonnie && hasSophia) {
+      dayEl.classList.add('double-coverage');
+      dayEl.title = 'Both Nonnie and Sophia assigned';
+    }
+  }
+}
+
+/* -----------------------------
    Calendar rendering
 ------------------------------ */
 function buildCalendar(year, month, shiftData) {
@@ -548,6 +630,9 @@ function buildCalendar(year, month, shiftData) {
     }
   });
 
+  // Auto coverage detection - highlight days that need attention
+  detectCoverageIssues(year, month, cellMap, custom);
+
   enableInteractions();
 }
 
@@ -622,6 +707,7 @@ function enableInteractions() {
     const text = target.classList.contains("note-card") ? target.textContent : null;
     target.remove();
     removeAssignmentFromStorage(dateKey, person, text);
+    updateDayCoverageStatus(day);
   });
 
   // double-tap removal for touch (mobile)
@@ -639,6 +725,7 @@ function enableInteractions() {
       const text = assignmentEl.classList.contains("note-card") ? assignmentEl.textContent : null;
       assignmentEl.remove();
       removeAssignmentFromStorage(dateKey, person, text);
+      updateDayCoverageStatus(day);
       lastTap = 0;
       e.preventDefault();
     } else {
@@ -682,6 +769,7 @@ function addAssignment(day, person, providedText = null) {
     const text = existing.classList.contains("note-card") ? existing.textContent : null;
     existing.remove();
     removeAssignmentFromStorage(dateKey, person, text);
+    updateDayCoverageStatus(day);
     return;
   }
 
@@ -731,6 +819,7 @@ function addAssignment(day, person, providedText = null) {
   }
 
   addAssignmentToStorage(dateKey, person, assignment.classList.contains('note-card') ? assignment.textContent : null);
+  updateDayCoverageStatus(dayEl);
 }
 
 /* -----------------------------
