@@ -1,9 +1,10 @@
 /* Full index.js — calendar rendering + K Work/Off toggle
-   Uses compact JSON from SHEETS_URL: shiftData[yyyy-MM-dd] = [{ person, category }, ...]
-   Toggle logic: Kristin entries are filtered by selected mode:
-     - work mode: show only Kristin working categories (K-Work, K-Weekend, K-NORA, K-Neuro, etc.)
-     - off mode : show only off categories (K-Off, K-PTO/Vacation). PTO is treated as off.
-   The toggle is a switch (checkbox) in the header and persists in localStorage.
+   Changes in this version:
+   - Replaced window.prompt note entry with inline textarea in the day-menu
+   - Ensured note text is sanitized and stored as plain text
+   - Added a lightweight error banner when fetching shift data fails
+   - Commented out legacy drag/drop moveAssignmentInStorage function (no longer used)
+   - Minor robustness improvements around initialization and menu focus
 */
 
 /* -----------------------------
@@ -17,9 +18,30 @@ let currentMonth = today.getMonth();
 
 const overlay = document.getElementById("loading-overlay");
 const titleEl = document.getElementById("title");
-let selectedPerson = null; // for tap-to-assign
-
 let kViewMode = localStorage.getItem("kViewMode") || "work";
+
+/* -----------------------------
+   Limits for compact view
+------------------------------ */
+const MAX_VISIBLE_SHIFT_LABELS = 3;
+const MAX_VISIBLE_ASSIGNMENTS = 3;
+
+/* -----------------------------
+   DOM references for enhanced controls
+------------------------------ */
+const dayMenu = document.getElementById('day-menu');
+const dayMenuButtons = document.getElementById('day-menu-buttons');
+const noteForm = document.getElementById('note-form');
+const noteInput = document.getElementById('note-input');
+const noteSaveBtn = document.getElementById('note-save');
+const noteCancelBtn = document.getElementById('note-cancel');
+
+const errorBanner = document.getElementById('error-banner');
+const errorBannerText = document.getElementById('error-banner-text');
+const errorRetryBtn = document.getElementById('error-retry');
+const errorDismissBtn = document.getElementById('error-dismiss');
+
+let _currentMenuTargetDay = null;
 
 /* -----------------------------
    Persistence Helpers
@@ -46,42 +68,45 @@ function removeAssignmentFromStorage(dateKey, person, text = null) {
   if (custom[dateKey] && custom[dateKey].length === 0) delete custom[dateKey];
   saveCustomAssignments(custom);
 }
-function moveAssignmentInStorage(oldDateKey, newDateKey, person, text = null) {
-  const custom = loadCustomAssignments();
-  if (!custom[oldDateKey]) return;
-  let removed = null;
-  if (person === "Note" && text !== null) {
-    for (let i = 0; i < custom[oldDateKey].length; i++) {
-      const a = custom[oldDateKey][i];
-      if (a.person === "Note" && a.text === text) { removed = a; custom[oldDateKey].splice(i, 1); break; }
-    }
-  } else {
-    for (let i = 0; i < custom[oldDateKey].length; i++) {
-      const a = custom[oldDateKey][i];
-      if (a.person === person) { removed = a; custom[oldDateKey].splice(i, 1); break; }
-    }
-  }
-  if (custom[oldDateKey] && custom[oldDateKey].length === 0) delete custom[oldDateKey];
-  if (removed) {
-    if (!custom[newDateKey]) custom[newDateKey] = [];
-    custom[newDateKey].push(removed);
-    saveCustomAssignments(custom);
-  } else {
-    if (!custom[newDateKey]) custom[newDateKey] = [];
-    custom[newDateKey].push({ person, text });
-    saveCustomAssignments(custom);
-  }
+
+/* Legacy drag/drop helper — commented out because drag/drop is not used.
+/function moveAssignmentInStorage(oldDateKey, newDateKey, person, text = null) {
+  // kept for compatibility though drag/drop removed
+  ...
+}
+*/
+
+/* Update note text in storage (sanitized)
+   We keep matching by person === "Note" and the previous plain-text value.
+*/
+function sanitizeText(raw) {
+  if (raw == null) return "";
+  // remove HTML (if any) by reading textContent via a temporary element,
+  // collapse whitespace and trim.
+  const tmp = document.createElement('div');
+  tmp.innerHTML = String(raw);
+  let s = tmp.textContent || tmp.innerText || "";
+  s = s.replace(/\r?\n+/g, ' ');      // convert newlines to spaces
+  s = s.replace(/\s+/g, ' ').trim();  // collapse whitespace
+  return s;
 }
 function updateNoteText(dateKey, oldText, newText) {
   const custom = loadCustomAssignments();
-  if (custom[dateKey]) {
-    const note = custom[dateKey].find(a => a.person === "Note" && a.text === oldText);
-    if (note) { note.text = newText; saveCustomAssignments(custom); }
+  if (!custom[dateKey]) return;
+  const cleanOld = sanitizeText(oldText);
+  const cleanNew = sanitizeText(newText);
+  for (let i = 0; i < custom[dateKey].length; i++) {
+    const a = custom[dateKey][i];
+    if (a.person === "Note" && sanitizeText(a.text) === cleanOld) {
+      a.text = cleanNew;
+      saveCustomAssignments(custom);
+      return;
+    }
   }
 }
 
 /* -----------------------------
-   Fetch shift JSON
+   Fetch shift JSON + lightweight error banner
 ------------------------------ */
 async function fetchShiftData() {
   try {
@@ -89,10 +114,50 @@ async function fetchShiftData() {
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
     localStorage.setItem("shiftData", JSON.stringify(data || {}));
+    hideErrorBanner();
     return data || {};
   } catch (err) {
     console.error("Error fetching shift data:", err);
-    try { return JSON.parse(localStorage.getItem("shiftData") || "{}"); } catch (e) { return {}; }
+    showErrorBanner("Unable to refresh shifts — showing cached data.", () => {
+      // Retry handler
+      initFetchAndBuild();
+    });
+    try {
+      return JSON.parse(localStorage.getItem("shiftData") || "{}");
+    } catch (e) {
+      return {};
+    }
+  }
+}
+
+function showErrorBanner(message, onRetry) {
+  if (!errorBanner) return;
+  errorBannerText.textContent = message || "An error occurred.";
+  errorBanner.style.display = "";
+  errorBanner.setAttribute('aria-hidden', 'false');
+  // attach retry handler temporarily
+  errorRetryBtn.onclick = () => { if (typeof onRetry === 'function') onRetry(); hideErrorBanner(); };
+  errorDismissBtn.onclick = () => { hideErrorBanner(); };
+}
+function hideErrorBanner() {
+  if (!errorBanner) return;
+  errorBanner.style.display = "none";
+  errorBanner.setAttribute('aria-hidden', 'true');
+  errorRetryBtn.onclick = null;
+  errorDismissBtn.onclick = null;
+}
+
+/* Helper to init fetch & build for retry use */
+async function initFetchAndBuild() {
+  if (overlay) overlay.style.display = "block";
+  try {
+    const data = await fetchShiftData();
+    buildCalendar(currentYear, currentMonth, data || {});
+  } catch (err) {
+    console.error("Initialization fetch error:", err);
+    buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
+  } finally {
+    if (overlay) overlay.style.display = "none";
   }
 }
 
@@ -158,6 +223,8 @@ function isKristinOffCategory(cat) {
 
 /* -----------------------------
    Assignment element factory
+   Notes are contentEditable for quick inline editing, but we sanitize and save
+   changes reliably using textContent via sanitizeText before writing to storage.
 ------------------------------ */
 function createAssignmentElement(dateKey, person, text = null) {
   const assignment = document.createElement("div");
@@ -165,20 +232,35 @@ function createAssignmentElement(dateKey, person, text = null) {
   assignment.dataset.person = person;
   assignment.dataset.dateKey = dateKey;
   assignment.id = 'assignment-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
-  assignment.draggable = true;
   assignment.style.position = assignment.style.position || "relative";
   assignment.style.zIndex = 2;
-
-  assignment.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: assignment.id }));
-  });
 
   if (person === "Note") {
     assignment.classList.add("note-card");
     assignment.contentEditable = "true";
-    assignment.textContent = text || "";
+    assignment.textContent = sanitizeText(text || "");
     let oldText = assignment.textContent;
+    // sanitize on input and update storage (plain text)
     assignment.addEventListener("input", () => {
+      const clean = sanitizeText(assignment.textContent);
+      // push cleaned text into the element to remove any HTML artifacts
+      if (assignment.textContent !== clean) {
+        assignment.textContent = clean;
+        // keep caret at end — a tiny UX nicety
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(assignment);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      updateNoteText(assignment.dataset.dateKey, oldText, assignment.textContent);
+      oldText = assignment.textContent;
+    });
+    // save on blur as well
+    assignment.addEventListener("blur", () => {
+      const clean = sanitizeText(assignment.textContent);
+      if (assignment.textContent !== clean) assignment.textContent = clean;
       updateNoteText(assignment.dataset.dateKey, oldText, assignment.textContent);
       oldText = assignment.textContent;
     });
@@ -201,17 +283,90 @@ function setKToggleFromCheckbox() {
 }
 
 /* -----------------------------
-   Calendar rendering (uses compact JSON)
+   Day menu helpers (now includes inline note editor)
+------------------------------ */
+function showDayMenuForDay(day, anchorRect) {
+  _currentMenuTargetDay = day;
+  const menu = dayMenu;
+  if (!menu) return;
+  // always default to showing the main buttons and hide note form
+  dayMenuButtons.style.display = "";
+  noteForm.style.display = "none";
+  menu.setAttribute('aria-hidden', 'false');
+
+  // position menu near anchorRect, but keep inside viewport
+  const pad = 8;
+  const menuW = menu.offsetWidth || 220;
+  const menuH = menu.offsetHeight || 140;
+  let left = anchorRect.left;
+  let top = anchorRect.bottom + 6;
+
+  if (left + menuW + pad > window.innerWidth) left = Math.max(pad, window.innerWidth - menuW - pad);
+  if (top + menuH + pad > window.innerHeight) top = Math.max(pad, anchorRect.top - menuH - 6);
+
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+
+  // focus the first button for keyboard users
+  const firstBtn = menu.querySelector('.day-menu-buttons .menu-btn');
+  if (firstBtn) firstBtn.focus();
+}
+
+function hideDayMenu() {
+  if (!dayMenu) return;
+  dayMenu.setAttribute('aria-hidden', 'true');
+  _currentMenuTargetDay = null;
+  // cleanup note form if open
+  dayMenuButtons.style.display = "";
+  noteForm.style.display = "none";
+  noteInput.value = "";
+}
+
+/* Show inline note editor for a given day, optionally prefilling text (for edits) */
+function showNoteEditorForDay(day, initialText = "") {
+  _currentMenuTargetDay = day;
+  dayMenuButtons.style.display = "none";
+  noteForm.style.display = "";
+  dayMenu.setAttribute('aria-hidden', 'false');
+
+  noteInput.value = sanitizeText(initialText);
+  noteInput.focus();
+  // put caret at end
+  noteInput.selectionStart = noteInput.selectionEnd = noteInput.value.length;
+}
+
+/* -----------------------------
+   Helpers: add button & "more" toggle
+------------------------------ */
+function createAddButton(cell) {
+  const addBtn = document.createElement("button");
+  addBtn.className = "add-btn";
+  addBtn.type = "button";
+  addBtn.title = "Add assignment";
+  addBtn.textContent = "+";
+  addBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    showDayMenuForDay(cell, addBtn.getBoundingClientRect());
+  });
+  cell.appendChild(addBtn);
+}
+
+/* -----------------------------
+   Calendar rendering
 ------------------------------ */
 function buildCalendar(year, month, shiftData) {
   const calendarEl = document.getElementById("calendar");
   const weekdayRow = document.getElementById("weekday-row");
 
+  if (!calendarEl || !weekdayRow) {
+    throw new Error("Missing calendar or weekday-row element in DOM.");
+  }
+
   calendarEl.innerHTML = "";
   weekdayRow.innerHTML = "";
 
   const monthName = new Date(year, month).toLocaleString("default", { month: "long" });
-  titleEl.textContent = `${monthName} ${year}`;
+  if (titleEl) titleEl.textContent = `${monthName} ${year}`;
 
   ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d => {
     const div = document.createElement("div");
@@ -235,6 +390,9 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = dayNum;
     cell.appendChild(num);
 
+    // add button on carryover day
+    createAddButton(cell);
+
     const prevDate = new Date(year, month - 1, dayNum);
     const prevDateKey = formatDateKey(prevDate);
     cell.dataset.date = prevDateKey;
@@ -256,6 +414,9 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = day;
     cell.appendChild(num);
 
+    // small add button
+    createAddButton(cell);
+
     const dateKey = formatDateKey(date);
     cell.dataset.date = dateKey;
     cellMap.set(dateKey, cell);
@@ -264,44 +425,52 @@ function buildCalendar(year, month, shiftData) {
     const kristinEntries = shifts.filter(s => s.person && s.person.toLowerCase() === "kristin");
     const otherEntries = shifts.filter(s => !(s.person && s.person.toLowerCase() === "kristin"));
 
-    let shiftContainer = null;
-    if (otherEntries.length > 0 || kristinEntries.length > 0) {
-      shiftContainer = document.createElement("div");
+    const labels = [];
+    otherEntries.forEach(s => labels.push({ text: s.category || "", type: "shift" }));
+    if (kristinEntries.length > 0) {
+      if (kViewMode === "work") {
+        kristinEntries.forEach(e => { if (isKristinWorkingCategory(e.category)) labels.push({ text: e.category || "", type: "k-shift" }); });
+      } else {
+        kristinEntries.forEach(e => { if (isKristinOffCategory(e.category) || isKristinPTOCategory(e.category)) labels.push({ text: e.category || "K-Off", type: "k-off" }); });
+      }
+    }
+
+    // shift container with collapse
+    if (labels.length > 0) {
+      const shiftContainer = document.createElement("div");
       shiftContainer.className = "shift-container";
 
-      // render others
-      otherEntries.forEach(s => {
+      let hiddenLabels = 0;
+      labels.forEach((lbl, idx) => {
         const label = document.createElement("div");
         label.className = "shift-label";
-        label.textContent = s.category || "";
-        shiftContainer.appendChild(label);
+        if (lbl.type === "k-off") label.classList.add("k-off");
+        if (lbl.type === "k-shift") label.classList.add("k-shift");
+        label.textContent = lbl.text;
+        if (idx < MAX_VISIBLE_SHIFT_LABELS) {
+          shiftContainer.appendChild(label);
+        } else {
+          label.classList.add("hidden-shift");
+          label.style.display = "none";
+          shiftContainer.appendChild(label);
+          hiddenLabels++;
+        }
       });
 
-      // Kristin: filter by kViewMode
-      if (kristinEntries.length > 0) {
-        if (kViewMode === "work") {
-          // only show working categories
-          kristinEntries.forEach(e => {
-            if (isKristinWorkingCategory(e.category)) {
-              const label = document.createElement("div");
-              label.className = "shift-label k-shift";
-              label.textContent = e.category || "";
-              shiftContainer.appendChild(label);
-            }
-          });
-        } else { // off mode
-          // only show off/PT0 categories
-          kristinEntries.forEach(e => {
-            if (isKristinOffCategory(e.category) || isKristinPTOCategory(e.category)) {
-              const label = document.createElement("div");
-              label.className = "shift-label k-off";
-              label.textContent = e.category || "K-Off";
-              shiftContainer.appendChild(label);
-            }
-          });
-        }
-      } else {
-        // nothing for Kristin on this date (we do not infer)
+      if (hiddenLabels > 0) {
+        const more = document.createElement("div");
+        more.className = "shift-label more-label";
+        more.textContent = `+${hiddenLabels}`;
+        more.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const expanded = shiftContainer.classList.toggle('expanded');
+          more.textContent = expanded ? '−' : `+${hiddenLabels}`;
+          const hiddenEls = shiftContainer.querySelectorAll('.hidden-shift');
+          hiddenEls.forEach(el => { el.style.display = expanded ? '' : 'none'; });
+          const dayEl = shiftContainer.closest('.day');
+          if (dayEl) dayEl.classList.toggle('expanded', expanded);
+        });
+        shiftContainer.appendChild(more);
       }
 
       cell.appendChild(shiftContainer);
@@ -329,6 +498,9 @@ function buildCalendar(year, month, shiftData) {
     num.textContent = d;
     cell.appendChild(num);
 
+    // add button for carryover days
+    createAddButton(cell);
+
     const nextDate = new Date(year, month + 1, d);
     const nextDateKey = formatDateKey(nextDate);
     cell.dataset.date = nextDateKey;
@@ -336,94 +508,111 @@ function buildCalendar(year, month, shiftData) {
     calendarEl.appendChild(cell);
   }
 
-  // custom assignments
+  // custom assignments rendering (with collapse)
   const custom = loadCustomAssignments();
   Object.entries(custom).forEach(([dateKey, items]) => {
     const cell = cellMap.get(dateKey);
     if (cell) {
-      items.forEach(item => {
+      items.forEach((item, idx) => {
         const assignment = createAssignmentElement(dateKey, item.person, item.text);
-        assignment.dataset.dateKey = dateKey;
-        cell.appendChild(assignment);
+        if (idx < MAX_VISIBLE_ASSIGNMENTS) {
+          cell.appendChild(assignment);
+        } else {
+          assignment.classList.add('hidden-assignment');
+          assignment.style.display = 'none';
+          cell.appendChild(assignment);
+        }
       });
+
+      if (items.length > MAX_VISIBLE_ASSIGNMENTS) {
+        let shiftContainer = cell.querySelector('.shift-container');
+        if (!shiftContainer) {
+          shiftContainer = document.createElement('div');
+          shiftContainer.className = 'shift-container';
+          cell.appendChild(shiftContainer);
+        }
+        const more = document.createElement("div");
+        more.className = "shift-label more-label";
+        more.textContent = `+${items.length - MAX_VISIBLE_ASSIGNMENTS}`;
+        more.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const expanded = shiftContainer.classList.toggle('expanded');
+          more.textContent = expanded ? '−' : `+${items.length - MAX_VISIBLE_ASSIGNMENTS}`;
+          const dayEl = shiftContainer.closest('.day');
+          if (dayEl) dayEl.classList.toggle('expanded', expanded);
+          const hiddenAssignments = dayEl.querySelectorAll('.assignment.hidden-assignment');
+          hiddenAssignments.forEach(el => { el.style.display = expanded ? 'block' : 'none'; });
+        });
+        shiftContainer.appendChild(more);
+      }
     }
   });
 
-  enableInteractions("ontouchstart" in window);
+  enableInteractions();
 }
 
 /* -----------------------------
-   Interactions (delegated, single init)
+   Interactions (delegated)
 ------------------------------ */
 let _interactionsInitialized = false;
-function enableInteractions(isTouchDevice) {
+function enableInteractions() {
   if (_interactionsInitialized) return;
   _interactionsInitialized = true;
 
-  const tray = document.getElementById('tray');
-  const calendarEl = document.getElementById('calendar');
+  // Day-menu button handling (main buttons)
+  if (dayMenuButtons) {
+    dayMenuButtons.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const person = btn.dataset.person;
+      const action = btn.dataset.action;
+      if (action === 'cancel') { hideDayMenu(); return; }
+      if (!_currentMenuTargetDay) { hideDayMenu(); return; }
+      const targetDay = _currentMenuTargetDay;
+      if (person === 'Note') {
+        // show inline editor
+        showNoteEditorForDay(targetDay, "");
+      } else if (person) {
+        hideDayMenu();
+        addAssignment(targetDay, person);
+      }
+    });
+  }
 
-  document.addEventListener('dragstart', e => {
-    const el = e.target;
-    if (!el.classList || !el.classList.contains('assignment')) return;
-    const inTray = !!el.closest('#tray');
-    if (inTray) {
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'tray', person: el.dataset.person }));
-    } else {
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: el.id }));
-    }
-  });
+  // Note form save / cancel handlers
+  if (noteSaveBtn) {
+    noteSaveBtn.addEventListener('click', () => {
+      if (!_currentMenuTargetDay) { hideDayMenu(); return; }
+      const txt = sanitizeText(noteInput.value);
+      if (!txt) { // empty -> do nothing
+        hideDayMenu();
+        return;
+      }
+      addAssignment(_currentMenuTargetDay, 'Note', txt);
+      hideDayMenu();
+    });
+  }
+  if (noteCancelBtn) {
+    noteCancelBtn.addEventListener('click', () => {
+      hideDayMenu();
+    });
+  }
 
-  calendarEl.addEventListener('dragover', e => { if (e.target.closest('.day')) e.preventDefault(); });
+  // allow Ctrl/Cmd+Enter to save in textarea
+  if (noteInput) {
+    noteInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        noteSaveBtn.click();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        noteCancelBtn.click();
+      }
+    });
+  }
 
-  calendarEl.addEventListener('drop', e => {
-    e.preventDefault();
-    const day = e.target.closest('.day');
-    if (!day) return;
-
-    const raw = e.dataTransfer.getData('text/plain');
-    if (!raw) return;
-    let payload;
-    try { payload = JSON.parse(raw); } catch (err) { payload = { type: 'tray', person: raw }; }
-
-    if (payload.type === 'tray') {
-      addAssignment(day, payload.person);
-      return;
-    }
-    if (payload.type === 'existing') {
-      const el = document.getElementById(payload.id);
-      if (!el) return;
-      const oldDay = el.closest('.day');
-      if (!oldDay || oldDay === day) return;
-
-      const oldDateKey = oldDay.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10)));
-      const newDateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
-
-      day.appendChild(el);
-      el.dataset.dateKey = newDateKey;
-
-      const person = el.classList.contains("note-card") ? "Note" : el.textContent;
-      const text = el.classList.contains("note-card") ? el.textContent : null;
-
-      moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
-    }
-  });
-
-  tray.addEventListener('click', e => {
-    const card = e.target.closest('.assignment');
-    if (!card) return;
-    selectedPerson = card.dataset.person;
-    tray.querySelectorAll('.assignment').forEach(c => c.classList.toggle('active', c === card));
-  });
-
-  calendarEl.addEventListener('click', e => {
-    const day = e.target.closest('.day');
-    if (!day) return;
-    if (!selectedPerson) return;
-    addAssignment(day, selectedPerson);
-  });
-
-  calendarEl.addEventListener('dblclick', e => {
+  // double-click removal (desktop)
+  document.getElementById('calendar').addEventListener('dblclick', e => {
     const target = e.target.closest('.assignment');
     if (!target) return;
     const day = target.closest('.day');
@@ -435,57 +624,113 @@ function enableInteractions(isTouchDevice) {
     removeAssignmentFromStorage(dateKey, person, text);
   });
 
+  // double-tap removal for touch (mobile)
   let lastTap = 0;
-  let longPressTimer = null;
-
-  calendarEl.addEventListener('touchstart', e => {
+  document.getElementById('calendar').addEventListener('touchstart', (e) => {
     const assignmentEl = e.target.closest('.assignment');
     if (!assignmentEl) return;
-    const day = assignmentEl.closest('.day');
-    if (!day) return;
-
-    if (assignmentEl.classList.contains('note-card')) {
-      longPressTimer = setTimeout(() => {
-        const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
-        const text = assignmentEl.textContent;
-        assignmentEl.remove();
-        removeAssignmentFromStorage(dateKey, "Note", text);
-      }, 600);
-    }
-
     const now = Date.now();
     if (now - lastTap < 300) {
-      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-      lastTap = 0;
+      // double-tap -> remove
+      const day = assignmentEl.closest('.day');
+      if (!day) return;
       const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
       const person = assignmentEl.classList.contains("note-card") ? "Note" : assignmentEl.textContent;
       const text = assignmentEl.classList.contains("note-card") ? assignmentEl.textContent : null;
       assignmentEl.remove();
       removeAssignmentFromStorage(dateKey, person, text);
+      lastTap = 0;
       e.preventDefault();
     } else {
       lastTap = now;
     }
   }, { passive: true });
 
-  calendarEl.addEventListener('touchend', () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } });
+  // clicking on a note assignment opens editor for editing (single-click)
+  document.getElementById('calendar').addEventListener('click', (e) => {
+    const noteEl = e.target.closest('.assignment.note-card');
+    if (!noteEl) return;
+    const day = noteEl.closest('.day');
+    if (!day) return;
+    // open inline note editor prefilling current note text for safer editing
+    showNoteEditorForDay(day, noteEl.textContent || "");
+    // hide the calendar click default
+    e.stopPropagation();
+  });
+
+  // close day menu on outside click
+  document.addEventListener('click', (e) => {
+    if (!dayMenu) return;
+    const isInside = e.target.closest('.day-menu') || e.target.classList && e.target.classList.contains('add-btn');
+    if (!isInside) hideDayMenu();
+  });
+
+  // wire error banner retry/dismiss already in DOM setup
 }
 
 /* -----------------------------
    Add / remove assignment helpers
 ------------------------------ */
-function addAssignment(day, person) {
+function addAssignment(day, person, providedText = null) {
   const dateKey = day.dataset.date || formatDateKey(new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10)));
-  const existing = day.querySelector(`.assignment.${person.toLowerCase()}`);
+  // toggle behavior: if an assignment for that person exists on the same day, remove it
+  const existing = Array.from(day.querySelectorAll('.assignment')).find(a => {
+    if (person === 'Note') return a.classList.contains('note-card') && (providedText ? sanitizeText(a.textContent) === sanitizeText(providedText) : true);
+    return !a.classList.contains('note-card') && a.textContent === person;
+  });
   if (existing) {
+    const text = existing.classList.contains("note-card") ? existing.textContent : null;
     existing.remove();
-    removeAssignmentFromStorage(dateKey, person, existing.textContent);
+    removeAssignmentFromStorage(dateKey, person, text);
     return;
   }
-  const assignment = createAssignmentElement(dateKey, person);
+
+  // notes: providedText required; opened via inline editor — if none, do nothing
+  let textToUse = providedText;
+  if (person === 'Note' && textToUse == null) {
+    // fallback: do nothing (we no longer use prompt)
+    return;
+  }
+  textToUse = sanitizeText(textToUse);
+
+  const assignment = createAssignmentElement(dateKey, person, textToUse);
   assignment.dataset.dateKey = dateKey;
-  day.appendChild(assignment);
-  addAssignmentToStorage(dateKey, person, assignment.textContent);
+
+  // place the new assignment; collapse extras
+  const dayEl = day;
+  const visibleAssignments = dayEl.querySelectorAll('.assignment:not(.hidden-assignment)');
+  if (visibleAssignments.length >= MAX_VISIBLE_ASSIGNMENTS) {
+    assignment.classList.add('hidden-assignment');
+    assignment.style.display = 'none';
+    dayEl.appendChild(assignment);
+
+    let shiftContainer = dayEl.querySelector('.shift-container');
+    if (!shiftContainer) {
+      shiftContainer = document.createElement('div');
+      shiftContainer.className = 'shift-container';
+      dayEl.appendChild(shiftContainer);
+    }
+    let moreBadge = shiftContainer.querySelector('.more-label');
+    const hiddenAssignmentsCount = dayEl.querySelectorAll('.assignment.hidden-assignment').length;
+    if (!moreBadge) {
+      moreBadge = document.createElement('div');
+      moreBadge.className = 'shift-label more-label';
+      moreBadge.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const expanded = shiftContainer.classList.toggle('expanded');
+        moreBadge.textContent = expanded ? '−' : `+${hiddenAssignmentsCount}`;
+        dayEl.classList.toggle('expanded', expanded);
+        const hiddenAssignments = dayEl.querySelectorAll('.assignment.hidden-assignment');
+        hiddenAssignments.forEach(el => { el.style.display = expanded ? 'block' : 'none'; });
+      });
+      shiftContainer.appendChild(moreBadge);
+    }
+    moreBadge.textContent = `+${hiddenAssignmentsCount}`;
+  } else {
+    dayEl.appendChild(assignment);
+  }
+
+  addAssignmentToStorage(dateKey, person, assignment.classList.contains('note-card') ? assignment.textContent : null);
 }
 
 /* -----------------------------
@@ -506,41 +751,54 @@ function goToNext() {
    Initialization
 ------------------------------ */
 document.addEventListener("DOMContentLoaded", async () => {
-  const prevBtn = document.getElementById("prev");
-  const nextBtn = document.getElementById("next");
-  const printBtn = document.getElementById("print");
-  const kCheckbox = document.getElementById("k-toggle-checkbox");
-  const kLabel = document.getElementById("k-toggle-label");
-
-  if (prevBtn) prevBtn.addEventListener("click", goToPrev);
-  if (nextBtn) nextBtn.addEventListener("click", goToNext);
-  if (printBtn) printBtn.addEventListener("click", () => window.print());
-
-  // initialize K toggle checkbox from localStorage
-  if (kCheckbox) {
-    kCheckbox.checked = (localStorage.getItem("kViewMode") === "off");
-    setKToggleFromCheckbox();
-    kCheckbox.addEventListener("change", () => {
-      setKToggleFromCheckbox();
-      // rebuild using cached shift data
-      const data = JSON.parse(localStorage.getItem("shiftData") || "{}");
-      buildCalendar(currentYear, currentMonth, data);
-    });
-  }
-
-  if (kLabel) {
-    // ensure label reflects state
-    kLabel.textContent = (kCheckbox && kCheckbox.checked) ? "K: Off" : "K: Work";
-  }
-
-  if (overlay) overlay.style.display = "block";
   try {
-    const data = await fetchShiftData();
-    buildCalendar(currentYear, currentMonth, data || {});
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const printBtn = document.getElementById("print");
+    const kCheckbox = document.getElementById("k-toggle-checkbox");
+    const kLabel = document.getElementById("k-toggle-label");
+
+    if (prevBtn) prevBtn.addEventListener("click", goToPrev);
+    if (nextBtn) nextBtn.addEventListener("click", goToNext);
+    if (printBtn) printBtn.addEventListener("click", () => window.print());
+
+    if (kCheckbox) {
+      kCheckbox.checked = (localStorage.getItem("kViewMode") === "off");
+      setKToggleFromCheckbox();
+      kCheckbox.addEventListener("change", () => {
+        setKToggleFromCheckbox();
+        const data = JSON.parse(localStorage.getItem("shiftData") || "{}");
+        buildCalendar(currentYear, currentMonth, data);
+      });
+    }
+
+    if (kLabel) {
+      kLabel.textContent = (document.getElementById("k-toggle-checkbox") && document.getElementById("k-toggle-checkbox").checked) ? "K: Off" : "K: Work";
+    }
+
+    // wire error banner buttons (in case clicked before fetch)
+    if (errorRetryBtn) {
+      errorRetryBtn.addEventListener('click', () => {
+        hideErrorBanner();
+        initFetchAndBuild();
+      });
+    }
+    if (errorDismissBtn) {
+      errorDismissBtn.addEventListener('click', () => hideErrorBanner());
+    }
+
+    if (overlay) overlay.style.display = "block";
+    try {
+      const data = await fetchShiftData();
+      buildCalendar(currentYear, currentMonth, data || {});
+    } catch (err) {
+      console.error("Initialization error:", err);
+      buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
+    } finally {
+      if (overlay) overlay.style.display = "none";
+    }
   } catch (err) {
-    console.error("Initialization error:", err);
-    buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
-  } finally {
+    console.error("Fatal initialization error:", err);
     if (overlay) overlay.style.display = "none";
   }
 });
