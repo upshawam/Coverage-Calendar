@@ -198,6 +198,24 @@ body {
 .day-number { font-weight: 700; font-size: 0.95em; }
 .day.weekend { background: #eef6ff; }
 
+/* Auto coverage detection indicators */
+.day.no-coverage {
+  border: 2px solid #d32f2f;
+  background: #ffebee;
+}
+.day.no-coverage.weekend {
+  border: 2px solid #d32f2f;
+  background: #e3f2fd;
+}
+.day.double-coverage {
+  border: 2px solid #f57c00;
+  background: #fff3e0;
+}
+.day.double-coverage.weekend {
+  border: 2px solid #f57c00;
+  background: #e3f2fd;
+}
+
 /* subdued add button */
 .add-btn {
   position: absolute;
@@ -285,6 +303,52 @@ body {
 .assignment.note-card { background: #fff9c4; border: 1px solid #f0e68c; color: #222; }
 .assignment.hidden-assignment { display: none; }
 .day.expanded .assignment.hidden-assignment { display: block; }
+
+/* ========================================================================== */
+/*                          Coverage Legend                                   */
+/* ========================================================================== */
+.coverage-legend {
+  max-width: 900px;
+  margin: 12px auto 8px auto;
+  padding: 10px 12px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88em;
+  box-sizing: border-box;
+}
+.legend-title {
+  font-weight: 600;
+  color: #333;
+  margin-right: 4px;
+}
+.legend-items {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-indicator {
+  width: 24px;
+  height: 18px;
+  border-radius: 3px;
+  border: 2px solid;
+}
+.no-coverage-indicator {
+  background: #ffebee;
+  border-color: #d32f2f;
+}
+.double-coverage-indicator {
+  background: #fff3e0;
+  border-color: #f57c00;
+}
 
 /* ========================================================================== */
 /*                              Day menu (popover)                            */
