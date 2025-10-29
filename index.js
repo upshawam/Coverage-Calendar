@@ -409,6 +409,7 @@ function initializeTouchInteractions() {
   // Touch double-tap removal for any assignment
   let lastTapTime = 0;
   let lastTapTarget = null;
+  let doubleTapDetected = false;
 
   calendar.addEventListener('touchend', e => {
     const target = e.target;
@@ -420,6 +421,8 @@ function initializeTouchInteractions() {
     if (timeSinceLastTap < 300 && target === lastTapTarget) {
       // Double-tap detected - remove assignment
       e.preventDefault();
+      doubleTapDetected = true;
+      
       const day = target.closest('.day');
       if (!day) return;
 
@@ -434,9 +437,13 @@ function initializeTouchInteractions() {
 
       lastTapTime = 0;
       lastTapTarget = null;
+      
+      // Clear double-tap flag after a short delay
+      setTimeout(() => { doubleTapDetected = false; }, 100);
     } else {
       lastTapTime = now;
       lastTapTarget = target;
+      doubleTapDetected = false;
     }
   });
 
@@ -447,6 +454,9 @@ function initializeTouchInteractions() {
   calendar.addEventListener('touchstart', e => {
     const target = e.target;
     if (!target.classList.contains('note-card')) return;
+    
+    // Don't start long-press if double-tap was just detected
+    if (doubleTapDetected) return;
 
     longPressTarget = target;
     longPressTimer = setTimeout(() => {
