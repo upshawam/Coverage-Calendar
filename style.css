@@ -2,9 +2,13 @@
 /*                                   Global                                   */
 /* ========================================================================== */
 body {
-  font-family: sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  background: #fff;
+  color: #222;
 }
 
 /* ========================================================================== */
@@ -17,176 +21,135 @@ body {
   max-width: 1100px;
   margin: 0 auto 20px auto;
   gap: 20px;
+  padding: 8px;
+  box-sizing: border-box;
+  width: 100%;
 }
-
-/* Left column: title + nav */
-.header-left {
-  flex: 1;
-}
+.header-left { flex: 1; }
 
 .nav-top {
   display: flex;
-  justify-content: flex-end;
-  padding: 4px 6px; /* padding around print button */
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px;
 }
 
-.nav-middle {
-  text-align: left; /* left-align the month/year */
-  margin: 4px 0;
+/* K Toggle switch wrapper */
+.k-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  font-size: 0.95em;
+  color: #333;
 }
 
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+}
+.switch input { display: none; }
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ddd;
+  border-radius: 26px;
+  transition: background 0.18s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.18s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+}
+.switch input:checked + .slider {
+  background: #0078d7;
+}
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Title */
 #title {
   font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 3.8em; /* large and clean */
+  font-size: 2.6em;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
   margin: 0;
   color: #222;
 }
 
-.nav-bottom {
-  display: flex;
-  justify-content: flex-start; /* prev/next under the title */
-  gap: 12px;
-  margin-top: 6px;
-}
+.nav-bottom { display: flex; gap: 12px; margin-top: 6px; }
 
-.nav-bottom button,
-.nav-top button {
+.nav-top button,
+.nav-bottom button {
   background: #eee;
   border: 1px solid #ccc;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9em;
-}
-
-.nav-bottom button:hover,
-.nav-top button:hover {
-  background: #ddd;
-}
-
-/* Right column: Drag/Drop tray */
-.header-right {
-  width: 220px;
-}
-
-.tray-box {
-  border: 1px solid #ccc;
+  padding: 6px 10px;
   border-radius: 6px;
-  padding: 8px;
-  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.95em;
 }
 
-.tray-title {
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 6px;
-  font-size: 0.95em;
-  color: #444;
-}
+/* Right column: tray */
+.header-right { width: 220px; box-sizing: border-box; }
+.tray-box { border: 1px solid #ccc; border-radius: 8px; padding: 10px; background: #fafafa; }
+.tray-title { font-weight: bold; text-align: center; margin-bottom: 6px; }
+.tray-hint { font-size: 0.78em; color: #666; text-align: center; margin-top: 8px; }
 
 .header-right .card-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   align-items: stretch;
-  margin: 0; /* override global margin */
-}
-
-/* ========================================================================== */
-/*                                Tray Hint                                   */
-/* ========================================================================== */
-.tray-hint {
-  font-size: 0.75em;
-  font-weight: normal;
-  color: #666;
-  text-align: center;
-  margin-top: 6px;
-}
-
-/* ========================================================================== */
-/*                           Other Month Days                                */
-/* ========================================================================== */
-.day.other-month .day-number {
-  color: #aaa;
-  font-weight: normal;
-}
-.day.other-month {
-  background: #f9f9f9; /* subtle background */
-}
-.day.other-month .assignment {
-  opacity: 0.6; /* lighter assignments */
+  margin: 0;
 }
 
 /* ========================================================================== */
 /*                              Assignment Cards                              */
 /* ========================================================================== */
 .assignment {
-  border-radius: 4px;
-  font-size: 0.85em;
-  margin: 2px 0;
-  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 0.92em;
+  margin: 4px 0;
+  padding: 6px 8px;
   display: inline-block;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
+  z-index: 2;
 }
 
 .card-container .assignment {
-  margin: 0 10px;
-  padding: 6px 10px;
-  font-weight: bold;
+  margin: 0 6px;
+  padding: 8px 10px;
+  font-weight: 700;
   cursor: grab;
-}
-
-.card-container .note-card {
-  display: inline-block;
-  width: auto;
-  max-width: 180px;
-  padding: 6px 10px;
-  font-size: 0.85em;
-  border-radius: 4px;
-  background: #fff9c4;
-  border: 1px solid #f0e68c;
-  box-sizing: border-box;
   white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
-.nonnie { background: #c8e6c9; }
-.sophia { background: #bbdefb; }
+.assignment.nonnie,
+.card-container .assignment.nonnie { background: #c8e6c9; color: #000; }
+.assignment.sophia,
+.card-container .assignment.sophia { background: #bbdefb; color: #000; }
+.assignment.note-card,
+.card-container .note-card { background: #fff9c4; border: 1px solid #f0e68c; color: #222; }
 
-/* ========================================================================== */
-/*                                Note Cards                                  */
-/* ========================================================================== */
-.calendar .note-card {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 4px 6px;
-  background: #fff9c4;
-  border: 1px solid #f0e68c;
-  border-radius: 4px;
-  color: #333;
-  font-size: 0.8em;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  hyphens: auto;
-  min-height: 1.2em;
-  margin-top: 2px;
-}
-
-.calendar .assignment.note-card[contenteditable="true"] {
-  cursor: text;
-  font-weight: normal;
-  resize: vertical;
-}
-
-.calendar .assignment.note-card[contenteditable="true"]:empty:before {
-  content: "Note";
-  color: #aaa;
-}
+/* calendar note card */
+.calendar .note-card { display: block; width: 100%; padding: 6px 8px; border-radius: 6px; font-size: 0.88em; }
 
 /* ========================================================================== */
 /*                              Calendar Layout                               */
@@ -198,170 +161,110 @@ body {
   margin: 0 auto;
   text-align: center;
   font-weight: bold;
-}
-
-.weekday-row div {
-  border: 1px solid #ccc;
-  padding: 6px 0;
-  background: #f5f5f5;
+  gap: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
+.weekday-row div { border: 1px solid #ccc; padding: 6px 8px; background: #f5f5f5; box-sizing: border-box; }
 
 .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   max-width: 900px;
   margin: 0 auto;
+  gap: 0;
+  box-sizing: border-box;
+  -webkit-user-select: none;
 }
 
 .day {
   border: 1px solid #ccc;
   min-height: 100px;
-  padding: 4px;
+  padding: 8px;
   position: relative;
   box-sizing: border-box;
   min-width: 0;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  background: #fff;
+  padding-bottom: 36px; /* space for shift labels */
 }
 
-.day-number {
-  font-weight: bold;
-}
-
-.day.weekend {
-  background: #e6f0ff;
-}
+.day-number { font-weight: 700; font-size: 0.95em; }
+.day.weekend { background: #e6f0ff; }
 
 /* ========================================================================== */
 /*                               Shift Labels                                 */
 /* ========================================================================== */
 .shift-container {
   position: absolute;
-  bottom: 2px;
-  left: 4px;
+  bottom: 6px;
+  right: 6px;
+  left: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: calc(100% - 12px);
+  pointer-events: none;
+  z-index: 0;
 }
 .shift-label {
-  font-size: 0.75em;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.72em;
+  font-weight: 600;
+  color: rgba(0,0,0,0.7);
+  background: rgba(255,255,255,0.85);
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.06);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+.shift-label.k-off { font-style: italic; color: #444; background: rgba(245,245,245,0.95); }
+.shift-label.k-shift { font-weight: 700; color: #111; background: rgba(235,245,255,0.95); }
 
-/* ========================================================================== */
-/*                              Holiday Styling                               */
-/* ========================================================================== */
-.holiday-label {
-  font-size: 0.75em;
-  color: #666;
-  margin-top: 2px;
-  display: block;
-}
-
-/* ========================================================================== */
-/*                           Coverage & Active States                         */
-/* ========================================================================== */
-.coverage-needed {
-  border: 2px solid #ff9800;
-  background: #fff3e0;
-}
-
-.assignment.active {
-  outline: 2px solid #0077cc;
-  outline-offset: 2px;
-}
+/* holiday */
+.holiday-label { font-size: 0.75em; color: #666; margin-top: 6px; }
 
 /* ========================================================================== */
 /*                                Print Styles                                */
 /* ========================================================================== */
 @media print {
-  body {
-    background: white;
-  }
-  .assignment {
-    cursor: default;
-  }
-  .card-container,
-  .nav button,
-  .tray-box {
-    display: none;
-  }
-  #title {
-    display: block;
-    text-align: center;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    font-size: 2.2em;
-  }
+  body { background: white; }
+  .assignment { cursor: default; }
+  .card-container, .nav button, .tray-box { display: none; }
+  #title { display: block; text-align: center; margin-top: 25px; margin-bottom: 15px; font-size: 2.2em; }
 }
 
 /* ========================================================================== */
 /*                           Mobile Responsive                                */
 /* ========================================================================== */
 @media (max-width: 700px) {
-  .header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .header-right {
-    width: 100%;
-    margin-top: 12px;
-  }
-  #title {
-    font-size: 2em;
-  }
+  .header { flex-direction: column; align-items: stretch; gap: 12px; padding: 10px; }
+  .header-right { width: 100%; margin-top: 0; order: 3; }
+  #title { font-size: 1.8em; text-align: left; word-break: break-word; }
+  .nav-top { justify-content: flex-start; }
+
+  .card-container { flex-direction: row; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 6px; }
+  .card-container .assignment { min-width: 110px; max-width: 160px; cursor: pointer; flex: 0 0 auto; }
+
+  .weekday-row, .calendar { max-width: 100%; margin: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+  .weekday-row { display: grid; grid-template-columns: repeat(7, 110px); justify-content: start; }
+  .calendar { display: grid; grid-template-columns: repeat(7, 110px); grid-auto-rows: minmax(90px, auto); gap: 0; justify-content: start; }
+
+  .day { min-height: 90px; padding: 8px; padding-bottom: 34px; box-sizing: border-box; }
+  .day-number { font-size: 1em; }
+  .shift-container { position: static; margin-top: 6px; gap: 6px; pointer-events: none; align-items: flex-start; }
+  .shift-label { font-size: 0.78em; padding: 3px 6px; border-radius: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 
 /* ========================================================================== */
 /*                           Loading Overlay + Spinner                        */
 /* ========================================================================== */
 #loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255,255,255,0.6); /* light tint */
-  display: none; /* hidden by default */
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.6); display: none; align-items: center; justify-content: center; z-index: 9999;
 }
-
-
-.loading-box {
-  background: #fff;
-  padding: 20px 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  font-family: sans-serif;
-  font-size: 16px;
-  color: #333;
-  animation: fadeIn 0.3s ease;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 5px solid #ccc;
-  border-top: 5px solid #0078d7;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
+.loading-box { background: #fff; padding: 18px 24px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 15px; color: #333; animation: fadeIn 0.22s ease; }
+.spinner { width: 36px; height: 36px; border: 5px solid #e0e0e0; border-top: 5px solid #0078d7; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
