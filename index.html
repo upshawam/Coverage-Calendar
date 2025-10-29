@@ -2,35 +2,44 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Coverage Calendar</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Loading Spinner Overlay -->
-<div id="loading-overlay">
-  <div class="loading-box">
-    <div class="spinner"></div>
-    <div>Loading Calendar…</div>
+  <div id="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div>Loading Calendar…</div>
+    </div>
   </div>
-</div>
-
 
   <div class="header">
-    <!-- Left side: title + nav -->
     <div class="header-left">
       <div class="nav-top">
         <button id="print">🖨 Print</button>
+
+        <!-- K toggle switch -->
+        <div class="k-toggle-wrapper" title="Toggle Kristin view">
+          <label class="switch" for="k-toggle-checkbox">
+            <input id="k-toggle-checkbox" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+          <span id="k-toggle-label">K: Work</span>
+        </div>
       </div>
+
       <div class="nav-middle">
         <span id="title"></span>
       </div>
+
       <div class="nav-bottom">
         <button id="prev">◀ Prev</button>
         <button id="next">Next ▶</button>
       </div>
     </div>
 
-    <!-- Right side: drag/drop tray -->
     <div class="header-right">
       <div class="tray-box">
         <div class="tray-title">Drag/Drop</div>
@@ -41,10 +50,10 @@
           <div class="assignment note-card" draggable="true" data-person="Note">Note</div>
         </div>
 
-        <div class="tray-hint">(Double‑click to remove)</div>
+        <div class="tray-hint">(Tap to select, double‑tap or double‑click an assignment to remove)</div>
       </div>
     </div>
-  </div> <!-- closes .header -->
+  </div>
 
   <!-- Weekday headers -->
   <div class="weekday-row" id="weekday-row"></div>
