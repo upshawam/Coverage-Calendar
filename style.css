@@ -429,7 +429,7 @@ body {
 /* ========================================================================== */
 @media print {
   .nav-bottom { display: none !important; }
-  .add-btn, .day-menu, .header-right { display: none !important; }
+  .add-btn, .day-menu, .header-right, .coverage-legend { display: none !important; }
   body { background: white; }
   .assignment { cursor: default; }
   #title { display: block; text-align: center; margin-top: 6px; margin-bottom: 12px; font-size: 2.2em; }
@@ -446,6 +446,20 @@ body {
   .nav-bottom { margin-top: 0; }
   .day-menu { min-width: 160px; }
   #note-input { min-width: 140px; }
+  
+  /* Make coverage legend more compact on mobile */
+  .coverage-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.82em;
+  }
+  .legend-title {
+    margin-right: 0;
+  }
+  .legend-items {
+    gap: 12px;
+  }
 }
 
 /* ========================================================================== */
