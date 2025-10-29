@@ -10,6 +10,9 @@ const overlay = document.getElementById("loading-overlay");
 const titleEl = document.getElementById("title");
 let selectedPerson = null;
 
+// Guard to prevent duplicate event listener initialization
+let _interactionsInitialized = false;
+
 /* -----------------------------
    Persistence Helpers
 ------------------------------ */
@@ -234,7 +237,11 @@ function buildCalendar(year, month, shiftData) {
     }
   });
 
-  enableInteractions("ontouchstart" in window);
+  // Initialize interactions only once
+  if (!_interactionsInitialized) {
+    initializeInteractions();
+    _interactionsInitialized = true;
+  }
 }
 
 /* -----------------------------
@@ -250,10 +257,7 @@ function createAssignmentElement(dateKey, person, text = null) {
   assignment.id = 'assignment-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
   assignment.draggable = true;
 
-  // dragging an existing assignment carries its id so drop can move it
-  assignment.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'existing', id: assignment.id }));
-  });
+  // Note: dragstart is handled by delegated event listener in initializeDesktopInteractions
 
   if (person === "Note") {
     assignment.classList.add("note-card");
@@ -272,138 +276,219 @@ function createAssignmentElement(dateKey, person, text = null) {
 }
 
 /* -----------------------------
-   Interactions
+   Interactions - Delegated Event Handlers
 ------------------------------ */
-function enableInteractions(isTouchDevice) {
+function initializeInteractions() {
+  const isTouchDevice = "ontouchstart" in window;
+
   if (isTouchDevice) {
-    enableTapToAssign();
+    initializeTouchInteractions();
   } else {
-    enableDragAndDrop();
-    enableDoubleClickRemove();
+    initializeDesktopInteractions();
   }
-  enableNoteRemoval();
 }
 
-function enableDragAndDrop() {
-  const trayCards = document.querySelectorAll('#tray .assignment');
-  const days = document.querySelectorAll('.day');
-
-  // tray cards now send a JSON payload so drop handler can distinguish creation vs move
-  trayCards.forEach(card => {
-    card.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'tray', person: card.dataset.person }));
-    });
+function initializeDesktopInteractions() {
+  // Delegated dragstart for tray cards
+  document.getElementById('tray').addEventListener('dragstart', e => {
+    if (e.target.classList.contains('assignment')) {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ 
+        type: 'tray', 
+        person: e.target.dataset.person 
+      }));
+    }
   });
 
-  days.forEach(day => {
-    day.addEventListener('dragover', e => e.preventDefault());
-    day.addEventListener('drop', e => {
+  // Delegated dragstart for existing assignments in calendar
+  document.getElementById('calendar').addEventListener('dragstart', e => {
+    if (e.target.classList.contains('assignment') && e.target.id) {
+      e.dataTransfer.setData('text/plain', JSON.stringify({ 
+        type: 'existing', 
+        id: e.target.id 
+      }));
+    }
+  });
+
+  // Delegated dragover and drop for calendar days
+  const calendar = document.getElementById('calendar');
+  calendar.addEventListener('dragover', e => {
+    if (e.target.closest('.day')) {
       e.preventDefault();
-      const raw = e.dataTransfer.getData('text/plain');
-      if (!raw) return;
+    }
+  });
 
-      let payload;
-      try {
-        payload = JSON.parse(raw);
-      } catch (err) {
-        // fallback to old plain-person payload
-        payload = { type: 'tray', person: raw };
-      }
+  calendar.addEventListener('drop', e => {
+    const day = e.target.closest('.day');
+    if (!day) return;
 
-      if (payload.type === 'tray') {
-        addAssignment(day, payload.person);
-        return;
-      }
+    e.preventDefault();
+    const raw = e.dataTransfer.getData('text/plain');
+    if (!raw) return;
 
-      if (payload.type === 'existing') {
-        const el = document.getElementById(payload.id);
-        if (!el) return;
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch (err) {
+      // fallback to old plain-person payload
+      payload = { type: 'tray', person: raw };
+    }
 
-        const oldDay = el.closest('.day');
-        if (!oldDay) return;
-        if (oldDay === day) return;
+    if (payload.type === 'tray') {
+      addAssignment(day, payload.person);
+      return;
+    }
 
-        // prefer stored data-date on cells so other-month cells keep correct date
-        const oldDateKey = oldDay.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10))
-        );
-        const newDateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
+    if (payload.type === 'existing') {
+      const el = document.getElementById(payload.id);
+      if (!el) return;
 
-        // move DOM node and update its stored dateKey
-        day.appendChild(el);
-        el.dataset.dateKey = newDateKey;
+      const oldDay = el.closest('.day');
+      if (!oldDay) return;
+      if (oldDay === day) return;
 
-        // determine person/text for persistence
-        const person = el.classList.contains("note-card") ? "Note" : el.textContent;
-        const text = el.classList.contains("note-card") ? el.textContent : null;
+      // prefer stored data-date on cells so other-month cells keep correct date
+      const oldDateKey = oldDay.dataset.date || formatDateKey(
+        new Date(currentYear, currentMonth, parseInt(oldDay.querySelector(".day-number").textContent, 10))
+      );
+      const newDateKey = day.dataset.date || formatDateKey(
+        new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+      );
 
-        moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
-      }
-    });
+      // move DOM node and update its stored dateKey
+      day.appendChild(el);
+      el.dataset.dateKey = newDateKey;
+
+      // determine person/text for persistence
+      const person = el.classList.contains("note-card") ? "Note" : el.textContent;
+      const text = el.classList.contains("note-card") ? el.textContent : null;
+
+      moveAssignmentInStorage(oldDateKey, newDateKey, person, text);
+    }
+  });
+
+  // Delegated double-click removal for desktop
+  calendar.addEventListener('dblclick', e => {
+    if (e.target.classList.contains('assignment')) {
+      const day = e.target.closest('.day');
+      if (!day) return;
+
+      const dateKey = day.dataset.date || formatDateKey(
+        new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+      );
+      const person = e.target.classList.contains("note-card") ? "Note" : e.target.textContent;
+      const text = e.target.classList.contains("note-card") ? e.target.textContent : null;
+
+      e.target.remove();
+      removeAssignmentFromStorage(dateKey, person, text);
+    }
   });
 }
 
-function enableTapToAssign() {
-  const trayCards = document.querySelectorAll('#tray .assignment');
-  const days = document.querySelectorAll('.day');
-
-  trayCards.forEach(card => {
-    card.addEventListener('click', () => {
-      selectedPerson = card.dataset.person;
-      trayCards.forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-    });
+function initializeTouchInteractions() {
+  // Delegated tap-to-select for tray cards
+  document.getElementById('tray').addEventListener('click', e => {
+    if (e.target.classList.contains('assignment')) {
+      selectedPerson = e.target.dataset.person;
+      document.querySelectorAll('#tray .assignment').forEach(c => c.classList.remove('active'));
+      e.target.classList.add('active');
+    }
   });
 
-  days.forEach(day => {
-    day.addEventListener('click', () => {
-      if (!selectedPerson) return;
-      addAssignment(day, selectedPerson);
-    });
+  // Delegated tap-to-assign for calendar days
+  const calendar = document.getElementById('calendar');
+  calendar.addEventListener('click', e => {
+    const day = e.target.closest('.day');
+    if (!day) return;
+    if (!selectedPerson) return;
+    // Don't assign if clicking on an assignment itself
+    if (e.target.classList.contains('assignment')) return;
+    
+    addAssignment(day, selectedPerson);
   });
-}
 
-function enableDoubleClickRemove() {
-  const days = document.querySelectorAll('.day');
-  days.forEach(day => {
-    day.addEventListener('dblclick', e => {
-      const target = e.target;
-      if (target.classList.contains('assignment')) {
-        // Use the cell's stored date (handles other-month cells correctly)
-        const dateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
-        const person = target.classList.contains("note-card") ? "Note" : target.textContent;
-        const text = target.classList.contains("note-card") ? target.textContent : null;
+  // Touch double-tap removal for any assignment
+  let lastTapTime = 0;
+  let lastTapTarget = null;
+  let doubleTapDetected = false;
 
-        target.remove();
-        removeAssignmentFromStorage(dateKey, person, text);
-      }
-    });
+  calendar.addEventListener('touchend', e => {
+    const target = e.target;
+    if (!target.classList.contains('assignment')) return;
+
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapTime;
+
+    if (timeSinceLastTap < 300 && target === lastTapTarget) {
+      // Double-tap detected - remove assignment
+      e.preventDefault();
+      doubleTapDetected = true;
+      
+      const day = target.closest('.day');
+      if (!day) return;
+
+      const dateKey = day.dataset.date || formatDateKey(
+        new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+      );
+      const person = target.classList.contains("note-card") ? "Note" : target.textContent;
+      const text = target.classList.contains("note-card") ? target.textContent : null;
+
+      target.remove();
+      removeAssignmentFromStorage(dateKey, person, text);
+
+      lastTapTime = 0;
+      lastTapTarget = null;
+      
+      // Clear double-tap flag after a short delay
+      setTimeout(() => { doubleTapDetected = false; }, 100);
+    } else {
+      lastTapTime = now;
+      lastTapTarget = target;
+      doubleTapDetected = false;
+    }
   });
-}
 
-function enableNoteRemoval() {
-  const days = document.querySelectorAll('.day');
-  days.forEach(day => {
-    day.addEventListener('touchstart', e => {
-      const target = e.target;
-      if (target.classList.contains('note-card')) {
-        const dateKey = day.dataset.date || formatDateKey(
-          new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
-        );
-        const text = target.textContent;
+  // Long-press removal for note-cards (optional feature preserved)
+  let longPressTimer = null;
+  let longPressTarget = null;
 
-        let timer = setTimeout(() => {
-          target.remove();
-          removeAssignmentFromStorage(dateKey, "Note", text);
-        }, 600);
+  calendar.addEventListener('touchstart', e => {
+    const target = e.target;
+    if (!target.classList.contains('note-card')) return;
+    
+    // Don't start long-press if double-tap was just detected
+    if (doubleTapDetected) return;
 
-        target.addEventListener('touchend', () => clearTimeout(timer), { once: true });
-      }
-    });
+    longPressTarget = target;
+    longPressTimer = setTimeout(() => {
+      const day = target.closest('.day');
+      if (!day) return;
+
+      const dateKey = day.dataset.date || formatDateKey(
+        new Date(currentYear, currentMonth, parseInt(day.querySelector(".day-number").textContent, 10))
+      );
+      const text = target.textContent;
+
+      target.remove();
+      removeAssignmentFromStorage(dateKey, "Note", text);
+      longPressTimer = null;
+      longPressTarget = null;
+    }, 600);
+  });
+
+  calendar.addEventListener('touchend', e => {
+    if (longPressTimer && e.target === longPressTarget) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      longPressTarget = null;
+    }
+  });
+
+  calendar.addEventListener('touchmove', e => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      longPressTarget = null;
+    }
   });
 }
 

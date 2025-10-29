@@ -313,6 +313,71 @@ body {
   #title {
     font-size: 2em;
   }
+  
+  /* Make tray card container horizontally scrollable */
+  .header-right .card-container {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Increase tap target sizes in tray */
+  .card-container .assignment {
+    min-width: 80px;
+    padding: 12px 16px;
+    font-size: 0.9em;
+  }
+  
+  /* Make calendar horizontally scrollable with fixed column widths */
+  .weekday-row {
+    grid-auto-flow: column;
+    grid-auto-columns: 140px;
+    grid-template-columns: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .calendar {
+    grid-auto-flow: column;
+    grid-auto-columns: 140px;
+    grid-template-columns: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Increase tap targets and readability for days */
+  .day {
+    min-height: 120px;
+    padding: 8px;
+  }
+  
+  .day-number {
+    font-size: 1.1em;
+  }
+  
+  /* Make shift labels flow naturally instead of absolutely positioned */
+  .shift-container {
+    position: static;
+    margin-top: 4px;
+  }
+  
+  .shift-label {
+    font-size: 0.8em;
+  }
+  
+  /* Better touch targets for assignments */
+  .assignment {
+    padding: 6px 8px;
+    font-size: 0.9em;
+    margin: 4px 0;
+  }
+  
+  /* Navigation buttons bigger for touch */
+  .nav-bottom button,
+  .nav-top button {
+    padding: 8px 16px;
+    font-size: 1em;
+  }
 }
 
 /* ========================================================================== */
