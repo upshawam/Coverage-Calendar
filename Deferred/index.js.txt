@@ -1,0 +1,63 @@
+// Snippet to add to your existing index.js near the DOM refs section
+const refreshBtn = document.getElementById('refresh-btn');
+const lastUpdatedEl = document.getElementById('last-updated');
+
+// Modify fetchShiftData to set timestamp when successful (insert into your existing fetchShiftData)
+async function fetchShiftData() {
+  try {
+    const res = await fetch(SHEETS_URL + "?ts=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+    const data = await res.json();
+
+    // Expect top-level generatedAt (ISO). If not present, use now.
+    let serverTs = new Date();
+    let payload = data;
+    if (data && data.generatedAt) {
+      serverTs = new Date(data.generatedAt);
+      // Remove generatedAt so rest of code continues using original shape (date keys)
+      payload = Object.assign({}, data);
+      delete payload.generatedAt;
+    }
+
+    localStorage.setItem("shiftData", JSON.stringify(payload || {}));
+    // optional: also save timestamp for cached indicator
+    localStorage.setItem("shiftDataTs", String(serverTs.getTime()));
+
+    hideErrorBanner();
+    if (lastUpdatedEl) {
+      lastUpdatedEl.textContent = 'Updated: ' + serverTs.toLocaleString();
+    }
+    return payload || {};
+  } catch (err) {
+    console.error("Error fetching shift data:", err);
+    showErrorBanner("Unable to refresh shifts — showing cached data.", () => {
+      initFetchAndBuild();
+    });
+    try {
+      const cached = JSON.parse(localStorage.getItem("shiftData") || "{}");
+      if (lastUpdatedEl) {
+        var ts = localStorage.getItem('shiftDataTs');
+        lastUpdatedEl.textContent = 'Updated: (cached) ' + (ts ? new Date(Number(ts)).toLocaleString() : 'unknown');
+      }
+      return cached || {};
+    } catch (e) {
+      return {};
+    }
+  }
+}
+
+// Hook up the Refresh button to force a fresh fetch and rebuild
+if (refreshBtn) {
+  refreshBtn.addEventListener('click', async (ev) => {
+    ev.preventDefault();
+    if (overlay) overlay.style.display = "block";
+    try {
+      const data = await fetchShiftData();
+      buildCalendar(currentYear, currentMonth, data || {});
+    } catch (err) {
+      console.error("Manual refresh error:", err);
+    } finally {
+      if (overlay) overlay.style.display = "none";
+    }
+  });
+}
