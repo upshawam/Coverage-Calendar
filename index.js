@@ -10,7 +10,7 @@
 /* -----------------------------
    Config / Globals
 ------------------------------ */
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbwUYXXAHy_QK8EgY3SHYPnjERllTJu37XnROzS-H4d0_VqE9_1aMQ6SbzlRt6PsDkTf/exec";
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbzmS_-6Ot8A2nlcNPldlYSmw7AerLmhghUPukSA5-ckrEbh0Kh7ytT8W0hY-xDrksju/exec";
 
 const today = new Date();
 let currentYear = today.getFullYear();
