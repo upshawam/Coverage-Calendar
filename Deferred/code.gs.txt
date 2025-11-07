@@ -1,0 +1,171 @@
+/**
+ * Apps Script helper patch (drop into your Code.gs or new file)
+ * - Adds generatedAt to the exported JSON
+ * - Optional protected force-refresh path (commented/guarded)
+ * - Trigger helper functions: createHourlyImportTrigger, create6HourImportTrigger, createDailyImportTrigger, deleteImportBothTriggers
+ *
+ * NOTE:
+ * - Paste the doGet modifications into your existing doGet or replace it with this block.
+ * - If you enable the force refresh (`action=refresh`), store a secret using Script Properties and/or restrict by user email.
+ */
+
+/* Example: safe doGet wrapper that returns generatedAt + original sheet map */
+function doGet(e) {
+  // If you want to support a protected force-refresh via query param:
+  // ?action=refresh&secret=YOUR_SECRET
+  // Uncomment and configure the following block carefully if you need it.
+  /*
+  if (e && e.parameter && e.parameter.action === 'refresh') {
+    var providedSecret = e.parameter.secret;
+    var expected = PropertiesService.getScriptProperties().getProperty('FORCE_REFRESH_SECRET');
+    // Optional: restrict by effective user email
+    var allowedEmail = PropertiesService.getScriptProperties().getProperty('ADMIN_EMAIL'); // set to your email
+    var caller = Session.getEffectiveUser() ? Session.getEffectiveUser().getEmail() : null;
+    if (providedSecret && expected && providedSecret === expected && (!allowedEmail || caller === allowedEmail)) {
+      // Run the import (server-side)
+      try {
+        importBothCalendars(); // ensure this exists in the same project
+      } catch (err) {
+        // If import fails, continue to return whatever's currently in the sheet
+        Logger.log('force import failed: ' + err);
+      }
+    } else {
+      // unauthorized; return an error (do not run import)
+      return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  */
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Import4"); // adjust if using Import3
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Sheet 'Import4' not found" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var rows = sheet.getDataRange().getValues();
+  if (!rows || rows.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify({ generatedAt: new Date().toISOString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var header = rows[0].map(h => (h || "").toString().trim());
+  var idx = {
+    date: header.indexOf("Date") !== -1 ? header.indexOf("Date") : 0,
+    person: header.indexOf("Person") !== -1 ? header.indexOf("Person") : 1,
+    start: header.indexOf("Start") !== -1 ? header.indexOf("Start") : 2,
+    end: header.indexOf("End") !== -1 ? header.indexOf("End") : 3,
+    title: header.indexOf("Title") !== -1 ? header.indexOf("Title") : 4,
+    category: header.indexOf("Category") !== -1 ? header.indexOf("Category") : 5
+  };
+
+  var tz = Session.getScriptTimeZone();
+  var out = {};
+
+  for (var r = 1; r < rows.length; r++) {
+    var row = rows[r];
+    if (row.every(function(c){ return c === "" || c === null || typeof c === "undefined"; })) continue;
+    var dateCell = row[idx.date];
+    if (!dateCell) continue;
+
+    var dateObj;
+    if (dateCell instanceof Date) {
+      dateObj = dateCell;
+    } else {
+      dateObj = tryParseDate(String(dateCell));
+      if (!dateObj) continue;
+    }
+    var dateKey = Utilities.formatDate(dateObj, tz, "yyyy-MM-dd");
+    var person = (row[idx.person] || "").toString().trim();
+    if (!person) continue;
+    var category = (row[idx.category] || "").toString().trim();
+
+    if (!category) {
+      if (person === "Aaron") {
+        var startVal = (row[idx.start] || "").toString().trim();
+        var hour = parseStartHour(startVal);
+        category = (hour === null) ? "A-Day" : ((hour >= 17 || hour < 7) ? "A-Night" : "A-Day");
+      } else if (person === "Kristin") {
+        category = "K-Work";
+      } else {
+        category = "";
+      }
+    }
+
+    if (!out[dateKey]) out[dateKey] = [];
+    out[dateKey].push({ person: person, category: category });
+  }
+
+  // top-level generatedAt timestamp (ISO)
+  var result = Object.assign({ generatedAt: new Date().toISOString() }, out);
+
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
+
+/* small helpers from earlier (copy these into same file if not present) */
+function tryParseDate(s) {
+  s = (s || "").toString().trim();
+  if (!s) return null;
+  var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+  var parsed = new Date(s);
+  if (!isNaN(parsed.getTime())) return parsed;
+  return null;
+}
+
+function parseStartHour(startStr) {
+  if (!startStr) return null;
+  var m = startStr.match(/(\d{1,2})(?::\d{2})?/);
+  if (!m) return null;
+  var h = Number(m[1]);
+  if (isNaN(h)) return null;
+  return h;
+}
+
+/* Trigger helper functions (call one of these once from the Apps Script editor) */
+function createHourlyImportTrigger() {
+  // remove existing to avoid duplicates
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'importBothCalendars') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('importBothCalendars')
+    .timeBased()
+    .everyHours(1)
+    .create();
+  Logger.log('Created hourly trigger for importBothCalendars');
+}
+
+function create6HourImportTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'importBothCalendars') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('importBothCalendars')
+    .timeBased()
+    .everyHours(6)
+    .create();
+  Logger.log('Created 6-hour trigger for importBothCalendars');
+}
+
+function createDailyImportTrigger() {
+  ScriptApp.getProjectTriggers().forEach(function(t){
+    if (t.getHandlerFunction() === 'importBothCalendars') ScriptApp.deleteTrigger(t);
+  });
+  ScriptApp.newTrigger('importBothCalendars')
+    .timeBased()
+    .everyDays(1)
+    .atHour(2)
+    .create();
+  Logger.log('Created daily trigger for importBothCalendars at ~02:00');
+}
+
+function deleteImportBothTriggers() {
+  var triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(function(t) {
+    if (t.getHandlerFunction() === 'importBothCalendars') {
+      ScriptApp.deleteTrigger(t);
+      Logger.log('Deleted trigger: ' + t.getUniqueId());
+    }
+  });
+}
