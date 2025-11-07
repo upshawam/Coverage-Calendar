@@ -1,0 +1,6 @@
+<!-- Snippet to add to your existing index.html header .header-right -->
+<!-- Add next to the Print button -->
+<button id="refresh-btn" title="Refresh now">🔄 Refresh</button>
+<div id="last-updated" class="last-updated" aria-live="polite" style="font-size:0.85em;color:#666;margin-left:8px;">
+  <!-- JS will populate this with the last export time -->
+</div>
