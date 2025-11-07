@@ -5,6 +5,7 @@
    - Added a lightweight error banner when fetching shift data fails
    - Commented out legacy drag/drop moveAssignmentInStorage function (no longer used)
    - Minor robustness improvements around initialization and menu focus
+   - Restored rendering of imported shift labels (A / K etc.) for carryover prev/next-month cells
 */
 
 /* -----------------------------
@@ -331,7 +332,7 @@ function showNoteEditorForDay(day, initialText = "") {
 
   noteInput.value = sanitizeText(initialText);
   noteInput.focus();
-  // put caret at end
+  // put caretaker at end
   noteInput.selectionStart = noteInput.selectionEnd = noteInput.value.length;
 }
 
@@ -349,6 +350,64 @@ function createAddButton(cell) {
     showDayMenuForDay(cell, addBtn.getBoundingClientRect());
   });
   cell.appendChild(addBtn);
+}
+
+/* Helper to render imported shift labels into any cell (used for current month and carryover cells) */
+function renderShiftLabelsForCell(cell, dateKey, shiftData) {
+  const shifts = shiftData[dateKey] || [];
+  if (!shifts || shifts.length === 0) return;
+  const kristinEntries = shifts.filter(s => s.person && s.person.toLowerCase() === "kristin");
+  const otherEntries = shifts.filter(s => !(s.person && s.person.toLowerCase() === "kristin"));
+
+  const labels = [];
+  otherEntries.forEach(s => labels.push({ text: s.category || "", type: "shift" }));
+  if (kristinEntries.length > 0) {
+    if (kViewMode === "work") {
+      kristinEntries.forEach(e => { if (isKristinWorkingCategory(e.category)) labels.push({ text: e.category || "", type: "k-shift" }); });
+    } else {
+      kristinEntries.forEach(e => { if (isKristinOffCategory(e.category) || isKristinPTOCategory(e.category)) labels.push({ text: e.category || "K-Off", type: "k-off" }); });
+    }
+  }
+
+  if (labels.length === 0) return;
+
+  const shiftContainer = document.createElement("div");
+  shiftContainer.className = "shift-container";
+
+  let hiddenLabels = 0;
+  labels.forEach((lbl, idx) => {
+    const label = document.createElement("div");
+    label.className = "shift-label";
+    if (lbl.type === "k-off") label.classList.add("k-off");
+    if (lbl.type === "k-shift") label.classList.add("k-shift");
+    label.textContent = lbl.text;
+    if (idx < MAX_VISIBLE_SHIFT_LABELS) {
+      shiftContainer.appendChild(label);
+    } else {
+      label.classList.add("hidden-shift");
+      label.style.display = "none";
+      shiftContainer.appendChild(label);
+      hiddenLabels++;
+    }
+  });
+
+  if (hiddenLabels > 0) {
+    const more = document.createElement("div");
+    more.className = "shift-label more-label";
+    more.textContent = `+${hiddenLabels}`;
+    more.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const expanded = shiftContainer.classList.toggle('expanded');
+      more.textContent = expanded ? '−' : `+${hiddenLabels}`;
+      const hiddenEls = shiftContainer.querySelectorAll('.hidden-shift');
+      hiddenEls.forEach(el => { el.style.display = expanded ? '' : 'none'; });
+      const dayEl = shiftContainer.closest('.day');
+      if (dayEl) dayEl.classList.toggle('expanded', expanded);
+    });
+    shiftContainer.appendChild(more);
+  }
+
+  cell.appendChild(shiftContainer);
 }
 
 /* -----------------------------
@@ -385,6 +444,11 @@ function buildCalendar(year, month, shiftData) {
     const dayNum = daysInPrevMonth - firstDay + 1 + i;
     const cell = document.createElement("div");
     cell.className = "day other-month";
+
+    const prevDate = new Date(year, month - 1, dayNum);
+    const isWeekend = (prevDate.getDay() === 0 || prevDate.getDay() === 6);
+    if (isWeekend) cell.classList.add("weekend");
+
     const num = document.createElement("div");
     num.className = "day-number";
     num.textContent = dayNum;
@@ -393,10 +457,21 @@ function buildCalendar(year, month, shiftData) {
     // add button on carryover day
     createAddButton(cell);
 
-    const prevDate = new Date(year, month - 1, dayNum);
     const prevDateKey = formatDateKey(prevDate);
     cell.dataset.date = prevDateKey;
     cellMap.set(prevDateKey, cell);
+
+    // render imported shifts (A/K etc.) for carryover day
+    renderShiftLabelsForCell(cell, prevDateKey, shiftData);
+
+    // holiday if present
+    if (holidays[prevDateKey]) {
+      const holidayEl = document.createElement("div");
+      holidayEl.className = "holiday-label";
+      holidayEl.textContent = holidays[prevDateKey];
+      cell.appendChild(holidayEl);
+    }
+
     calendarEl.appendChild(cell);
   }
 
@@ -421,60 +496,8 @@ function buildCalendar(year, month, shiftData) {
     cell.dataset.date = dateKey;
     cellMap.set(dateKey, cell);
 
-    const shifts = shiftData[dateKey] || [];
-    const kristinEntries = shifts.filter(s => s.person && s.person.toLowerCase() === "kristin");
-    const otherEntries = shifts.filter(s => !(s.person && s.person.toLowerCase() === "kristin"));
-
-    const labels = [];
-    otherEntries.forEach(s => labels.push({ text: s.category || "", type: "shift" }));
-    if (kristinEntries.length > 0) {
-      if (kViewMode === "work") {
-        kristinEntries.forEach(e => { if (isKristinWorkingCategory(e.category)) labels.push({ text: e.category || "", type: "k-shift" }); });
-      } else {
-        kristinEntries.forEach(e => { if (isKristinOffCategory(e.category) || isKristinPTOCategory(e.category)) labels.push({ text: e.category || "K-Off", type: "k-off" }); });
-      }
-    }
-
-    // shift container with collapse
-    if (labels.length > 0) {
-      const shiftContainer = document.createElement("div");
-      shiftContainer.className = "shift-container";
-
-      let hiddenLabels = 0;
-      labels.forEach((lbl, idx) => {
-        const label = document.createElement("div");
-        label.className = "shift-label";
-        if (lbl.type === "k-off") label.classList.add("k-off");
-        if (lbl.type === "k-shift") label.classList.add("k-shift");
-        label.textContent = lbl.text;
-        if (idx < MAX_VISIBLE_SHIFT_LABELS) {
-          shiftContainer.appendChild(label);
-        } else {
-          label.classList.add("hidden-shift");
-          label.style.display = "none";
-          shiftContainer.appendChild(label);
-          hiddenLabels++;
-        }
-      });
-
-      if (hiddenLabels > 0) {
-        const more = document.createElement("div");
-        more.className = "shift-label more-label";
-        more.textContent = `+${hiddenLabels}`;
-        more.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          const expanded = shiftContainer.classList.toggle('expanded');
-          more.textContent = expanded ? '−' : `+${hiddenLabels}`;
-          const hiddenEls = shiftContainer.querySelectorAll('.hidden-shift');
-          hiddenEls.forEach(el => { el.style.display = expanded ? '' : 'none'; });
-          const dayEl = shiftContainer.closest('.day');
-          if (dayEl) dayEl.classList.toggle('expanded', expanded);
-        });
-        shiftContainer.appendChild(more);
-      }
-
-      cell.appendChild(shiftContainer);
-    }
+    // render imported shifts into the cell
+    renderShiftLabelsForCell(cell, dateKey, shiftData);
 
     // holiday
     if (holidays[dateKey]) {
@@ -493,6 +516,11 @@ function buildCalendar(year, month, shiftData) {
   for (let d = 1; d <= remaining; d++) {
     const cell = document.createElement("div");
     cell.className = "day other-month";
+
+    const nextDate = new Date(year, month + 1, d);
+    const isWeekend = (nextDate.getDay() === 0 || nextDate.getDay() === 6);
+    if (isWeekend) cell.classList.add("weekend");
+
     const num = document.createElement("div");
     num.className = "day-number";
     num.textContent = d;
@@ -501,10 +529,21 @@ function buildCalendar(year, month, shiftData) {
     // add button for carryover days
     createAddButton(cell);
 
-    const nextDate = new Date(year, month + 1, d);
     const nextDateKey = formatDateKey(nextDate);
     cell.dataset.date = nextDateKey;
     cellMap.set(nextDateKey, cell);
+
+    // render imported shifts for carryover day
+    renderShiftLabelsForCell(cell, nextDateKey, shiftData);
+
+    // holiday if present
+    if (holidays[nextDateKey]) {
+      const holidayEl = document.createElement("div");
+      holidayEl.className = "holiday-label";
+      holidayEl.textContent = holidays[nextDateKey];
+      cell.appendChild(holidayEl);
+    }
+
     calendarEl.appendChild(cell);
   }
 
