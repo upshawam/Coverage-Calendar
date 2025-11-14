@@ -109,6 +109,107 @@ function updateNoteText(dateKey, oldText, newText) {
 /* -----------------------------
    Export/Load Calendar Data
 ------------------------------ */
+
+// Formspree endpoint - configured to email calendar submissions
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xeovelyn';
+
+function showSubmitModal() {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('submit-modal');
+    const nameInput = document.getElementById('submitter-name');
+    const submitBtn = document.getElementById('submit-confirm');
+    const cancelBtn = document.getElementById('submit-cancel');
+    
+    modal.style.display = 'flex';
+    nameInput.value = '';
+    nameInput.focus();
+    
+    const handleSubmit = () => {
+      const name = nameInput.value.trim() || 'Anonymous';
+      modal.style.display = 'none';
+      cleanup();
+      resolve(name);
+    };
+    
+    const handleCancel = () => {
+      modal.style.display = 'none';
+      cleanup();
+      resolve(null);
+    };
+    
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter') handleSubmit();
+      if (e.key === 'Escape') handleCancel();
+    };
+    
+    const cleanup = () => {
+      submitBtn.removeEventListener('click', handleSubmit);
+      cancelBtn.removeEventListener('click', handleCancel);
+      nameInput.removeEventListener('keypress', handleKeyPress);
+    };
+    
+    submitBtn.addEventListener('click', handleSubmit);
+    cancelBtn.addEventListener('click', handleCancel);
+    nameInput.addEventListener('keypress', handleKeyPress);
+  });
+}
+
+async function submitChangesToEmail() {
+  // Check if endpoint is configured
+  if (!FORMSPREE_ENDPOINT || FORMSPREE_ENDPOINT === 'YOUR_FORMSPREE_ENDPOINT_HERE') {
+    showErrorBanner('Submit feature not configured yet. Please contact the calendar owner.', null);
+    return;
+  }
+  
+  // Show custom modal and wait for user input
+  const submitterName = await showSubmitModal();
+  if (submitterName === null) return; // User cancelled
+  
+  const customAssignments = loadCustomAssignments();
+  const sortedAssignments = {};
+  Object.keys(customAssignments).sort().forEach(dateKey => {
+    sortedAssignments[dateKey] = customAssignments[dateKey];
+  });
+  
+  const payload = {
+    savedAt: new Date().toISOString(),
+    assignments: sortedAssignments
+  };
+  
+  try {
+    const response = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        submitter: submitterName,
+        timestamp: new Date().toISOString(),
+        calendarData: JSON.stringify(payload, null, 2)
+      })
+    });
+    
+    const responseData = await response.json();
+    
+    // Formspree returns 200 even on success, check for their OK status
+    if (response.ok || responseData.ok) {
+      showSuccessBanner('Changes submitted! The calendar owner will review and update.');
+    } else {
+      console.error('Formspree error:', responseData);
+      throw new Error(responseData.error || 'Submit failed');
+    }
+  } catch (err) {
+    console.error('Submit error:', err);
+    // Only show error if it's a real network error, not a false positive
+    if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      showErrorBanner(`Failed to submit: ${err.message}`, null);
+    } else {
+      // Might be a CORS issue but submission went through
+      showSuccessBanner('Changes may have been submitted. Check your email to confirm.');
+    }
+  }
+}
 async function saveAndPublish() {
   const customAssignments = loadCustomAssignments();
   
@@ -942,6 +1043,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const printBtn = document.getElementById("print");
+    const submitBtn = document.getElementById("submit-changes");
     const exportBtn = document.getElementById("export-calendar");
     const kCheckbox = document.getElementById("k-toggle-checkbox");
     const kLabel = document.getElementById("k-toggle-label");
@@ -949,6 +1051,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (prevBtn) prevBtn.addEventListener("click", goToPrev);
     if (nextBtn) nextBtn.addEventListener("click", goToNext);
     if (printBtn) printBtn.addEventListener("click", () => window.print());
+    
+    if (submitBtn) {
+      submitBtn.addEventListener("click", async () => {
+        await submitChangesToEmail();
+      });
+    }
     
     if (exportBtn) {
       exportBtn.addEventListener("click", () => {

@@ -33,6 +33,7 @@
     </div>
 
     <div class="header-right">
+      <button id="submit-changes">📧 Submit Changes</button>
       <button id="export-calendar">💾 Export</button>
       <button id="print">🖨 Print</button>
 
@@ -52,6 +53,19 @@
 
   <!-- Calendar grid -->
   <div class="calendar" id="calendar"></div>
+
+  <!-- Submit Changes Modal -->
+  <div id="submit-modal" class="submit-modal" style="display:none;">
+    <div class="submit-modal-content">
+      <h3>Submit Calendar Changes</h3>
+      <p>Enter your name to submit changes to the calendar owner.</p>
+      <input type="text" id="submitter-name" placeholder="Your name (optional)" />
+      <div class="submit-modal-buttons">
+        <button id="submit-confirm" class="submit-btn">Submit</button>
+        <button id="submit-cancel" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Day menu (floating; contains both quick buttons and inline note editor) -->
   <div id="day-menu" class="day-menu" aria-hidden="true">
