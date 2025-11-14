@@ -107,6 +107,52 @@ function updateNoteText(dateKey, oldText, newText) {
 }
 
 /* -----------------------------
+   Export/Load Calendar Data
+------------------------------ */
+function exportCalendarData() {
+  const customAssignments = loadCustomAssignments();
+  const payload = {
+    savedAt: new Date().toISOString(),
+    assignments: customAssignments
+  };
+  
+  const dataStr = JSON.stringify(payload, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'calendar-data.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showSuccessBanner('Calendar exported! Drag to your repo folder and commit.');
+}
+
+async function loadCalendarData() {
+  try {
+    const res = await fetch('calendar-data.json?ts=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) {
+      console.log('No calendar-data.json found, using localStorage only');
+      return null;
+    }
+    
+    const data = await res.json();
+    if (data.assignments) {
+      saveCustomAssignments(data.assignments);
+      const savedDate = data.savedAt ? new Date(data.savedAt).toLocaleString() : 'unknown';
+      console.log('Calendar loaded from calendar-data.json:', savedDate);
+      return data;
+    }
+    return null;
+  } catch (err) {
+    console.error('Error loading calendar-data.json:', err);
+    return null;
+  }
+}
+
+/* -----------------------------
    Fetch shift JSON + lightweight error banner
 ------------------------------ */
 async function fetchShiftData() {
@@ -794,12 +840,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const printBtn = document.getElementById("print");
+    const exportBtn = document.getElementById("export-calendar");
     const kCheckbox = document.getElementById("k-toggle-checkbox");
     const kLabel = document.getElementById("k-toggle-label");
 
     if (prevBtn) prevBtn.addEventListener("click", goToPrev);
     if (nextBtn) nextBtn.addEventListener("click", goToNext);
     if (printBtn) printBtn.addEventListener("click", () => window.print());
+    
+    if (exportBtn) {
+      exportBtn.addEventListener("click", () => {
+        if (confirm('Export calendar data?\n\nThis will download calendar-data.json.\nDrag it to your repo folder and commit/push.')) {
+          exportCalendarData();
+        }
+      });
+    }
 
     if (kCheckbox) {
       kCheckbox.checked = (localStorage.getItem("kViewMode") === "off");
@@ -828,6 +883,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (overlay) overlay.style.display = "block";
     try {
+      // Load saved calendar data first
+      await loadCalendarData();
+      
       const data = await fetchShiftData();
       buildCalendar(currentYear, currentMonth, data || {});
     } catch (err) {
