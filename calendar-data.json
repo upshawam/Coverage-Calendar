@@ -1,135 +1,141 @@
 {
-  "savedAt": "2025-11-14T08:55:00.273Z",
-  "assignments": {
-    "2025-11-04": [
-      {
-        "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2025-11-05": [
-      {
-        "person": "Note",
-        "text": "A-Both kids"
-      }
-    ],
-    "2025-11-06": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-07": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-10": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-11": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-12": [
-      {
-        "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2025-11-13": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-14": [
-      {
-        "person": "Note",
-        "text": "A-Both kids"
-      }
-    ],
-    "2025-11-18": [
-      {
-        "person": "Note",
-        "text": "Nonnie?"
-      }
-    ],
-    "2025-11-19": [
-      {
-        "person": "Note",
-        "text": "Nonnie?"
-      },
-      {
-        "person": "Note",
-        "text": "Eric_B Stay"
-      }
-    ],
-    "2025-11-21": [
-      {
-        "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2025-11-24": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-25": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-11-26": [
-      {
-        "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2025-11-28": [
-      {
-        "person": "Note",
-        "text": "A-Both kids"
-      }
-    ],
-    "2025-12-01": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-12-02": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-12-03": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
-    "2025-12-05": [
-      {
-        "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2025-11-20": [
-      {
-        "person": "Note",
-        "text": "poop"
-      }
-    ]
-  }
+"savedAt": "2025-11-14T09:23:35.704Z",
+"assignments": {
+"2025-11-04": [
+{
+"person": "Nonnie",
+"text": null
+}
+],
+"2025-11-05": [
+{
+"person": "Note",
+"text": "A-Both kids"
+}
+],
+"2025-11-06": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-07": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-10": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-11": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-12": [
+{
+"person": "Nonnie",
+"text": null
+}
+],
+"2025-11-13": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-14": [
+{
+"person": "Note",
+"text": "A-Both kids"
+}
+],
+"2025-11-18": [
+{
+"person": "Note",
+"text": "Nonnie?"
+}
+],
+"2025-11-19": [
+{
+"person": "Note",
+"text": "Nonnie?"
+},
+{
+"person": "Note",
+"text": "Eric_B Stay"
+}
+],
+"2025-11-20": [
+{
+"person": "Note",
+"text": "poop"
+}
+],
+"2025-11-21": [
+{
+"person": "Nonnie",
+"text": null
+}
+],
+"2025-11-24": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-25": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-11-26": [
+{
+"person": "Nonnie",
+"text": null
+}
+],
+"2025-11-27": [
+{
+"person": "Note",
+"text": "yumm"
+}
+],
+"2025-11-28": [
+{
+"person": "Note",
+"text": "A-Both kids"
+}
+],
+"2025-12-01": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-12-02": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-12-03": [
+{
+"person": "Sophia",
+"text": null
+}
+],
+"2025-12-05": [
+{
+"person": "Nonnie",
+"text": null
+}
+]
+}
 }
