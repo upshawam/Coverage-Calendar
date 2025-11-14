@@ -109,6 +109,94 @@ function updateNoteText(dateKey, oldText, newText) {
 /* -----------------------------
    Export/Load Calendar Data
 ------------------------------ */
+async function saveAndPublish() {
+  const customAssignments = loadCustomAssignments();
+  const payload = {
+    savedAt: new Date().toISOString(),
+    assignments: customAssignments
+  };
+  
+  const dataStr = JSON.stringify(payload, null, 2);
+  
+  // Check if File System Access API is supported
+  if (!window.showSaveFilePicker) {
+    // Fallback: just download the file with instructions
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'calendar-data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    setTimeout(() => {
+      const doCommit = confirm(
+        'Calendar data downloaded!\n\n' +
+        'Next steps:\n' +
+        '1. Move calendar-data.json to your repo folder\n' +
+        '2. Run these commands in terminal:\n\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" add calendar-data.json\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" commit -m "Update calendar"\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" push\n\n' +
+        'Copy commands to clipboard?'
+      );
+      
+      if (doCommit) {
+        const commands = '& "C:\\Program Files\\Git\\bin\\git.exe" add calendar-data.json; & "C:\\Program Files\\Git\\bin\\git.exe" commit -m "Update calendar"; & "C:\\Program Files\\Git\\bin\\git.exe" push';
+        navigator.clipboard.writeText(commands).then(() => {
+          showSuccessBanner('Commands copied! Paste in terminal.');
+        });
+      }
+    }, 500);
+    return;
+  }
+  
+  try {
+    const opts = {
+      suggestedName: 'calendar-data.json',
+      types: [{
+        description: 'JSON Files',
+        accept: { 'application/json': ['.json'] }
+      }]
+    };
+    
+    const fileHandle = await window.showSaveFilePicker(opts);
+    const writable = await fileHandle.createWritable();
+    await writable.write(dataStr);
+    await writable.close();
+    
+    showSuccessBanner('Calendar saved! Now committing to GitHub...');
+    
+    setTimeout(() => {
+      const doCommit = confirm(
+        'File saved successfully!\n\n' +
+        'To publish to GitHub, run these commands in VS Code terminal:\n\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" add calendar-data.json\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" commit -m "Update calendar"\n' +
+        '& "C:\\Program Files\\Git\\bin\\git.exe" push\n\n' +
+        'Copy commands to clipboard?'
+      );
+      
+      if (doCommit) {
+        const commands = '& "C:\\Program Files\\Git\\bin\\git.exe" add calendar-data.json; & "C:\\Program Files\\Git\\bin\\git.exe" commit -m "Update calendar"; & "C:\\Program Files\\Git\\bin\\git.exe" push';
+        navigator.clipboard.writeText(commands).then(() => {
+          showSuccessBanner('Commands copied! Paste in terminal.');
+        });
+      }
+    }, 500);
+    
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      console.log('Save cancelled by user');
+      return;
+    }
+    console.error('Save error:', err);
+    showErrorBanner(`Save failed: ${err.message}`, null);
+  }
+}
+
 function exportCalendarData() {
   const customAssignments = loadCustomAssignments();
   const payload = {
@@ -840,6 +928,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const printBtn = document.getElementById("print");
+    const savePublishBtn = document.getElementById("save-publish");
     const exportBtn = document.getElementById("export-calendar");
     const kCheckbox = document.getElementById("k-toggle-checkbox");
     const kLabel = document.getElementById("k-toggle-label");
@@ -847,6 +936,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (prevBtn) prevBtn.addEventListener("click", goToPrev);
     if (nextBtn) nextBtn.addEventListener("click", goToNext);
     if (printBtn) printBtn.addEventListener("click", () => window.print());
+    
+    if (savePublishBtn) {
+      savePublishBtn.addEventListener("click", async () => {
+        if (confirm('Save & Publish calendar?\n\nThis will save calendar-data.json and help you commit to GitHub.')) {
+          await saveAndPublish();
+        }
+      });
+    }
     
     if (exportBtn) {
       exportBtn.addEventListener("click", () => {
