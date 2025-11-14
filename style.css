@@ -456,11 +456,83 @@ body {
 /*                                Print Styles                                */
 /* ========================================================================== */
 @media print {
-  .nav-bottom { display: none !important; }
-  .add-btn, .day-menu, .header-right { display: none !important; }
-  body { background: white; }
+  @page {
+    size: letter landscape;
+    margin: 0.4in;
+  }
+  
+  body {
+    background: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .nav-bottom, .add-btn, .day-menu, .header-right, .submit-modal { display: none !important; }
   .assignment { cursor: default; }
-  #title { display: block; text-align: center; margin-top: 6px; margin-bottom: 12px; font-size: 2.2em; }
+  
+  .header {
+    margin: 0 0 8px 0;
+    padding: 0;
+  }
+  
+  #title {
+    display: block;
+    text-align: center;
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+  }
+  
+  .weekday-row {
+    font-size: 0.85em;
+    max-width: 100%;
+  }
+  
+  .weekday-row div {
+    padding: 4px;
+  }
+  
+  .calendar {
+    max-width: 100%;
+    grid-auto-rows: minmax(80px, auto);
+    padding-bottom: 0;
+    page-break-inside: avoid;
+  }
+  
+  .day {
+    min-height: 80px;
+    padding: 4px;
+    font-size: 0.85em;
+    page-break-inside: avoid;
+  }
+  
+  .day-number {
+    font-size: 0.9em;
+  }
+  
+  .shift-label {
+    font-size: 0.65em;
+  }
+  
+  .assignment {
+    font-size: 0.8em;
+    padding: 3px 5px;
+    margin: 2px 0;
+  }
+  
+  .assignment.note-card {
+    background: white !important;
+    border: 1px solid #ddd !important;
+  }
+  
+  .holiday-label {
+    font-size: 0.7em;
+  }
+  
+  /* Force fit to one page */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
 }
 
 /* ========================================================================== */
