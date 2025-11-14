@@ -176,6 +176,85 @@ async function submitChangesToEmail() {
     assignments: sortedAssignments
   };
   
+  // Compare with last saved version to show only changes
+  let savedData = {};
+  try {
+    const res = await fetch('calendar-data.json?ts=' + Date.now(), { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      savedData = data.assignments || {};
+    }
+  } catch (e) {
+    // No saved version yet
+  }
+  
+  // Generate diff summary
+  const added = [];
+  const removed = [];
+  const modified = [];
+  
+  // Check for additions and modifications
+  Object.keys(sortedAssignments).forEach(dateKey => {
+    const newItems = sortedAssignments[dateKey];
+    const oldItems = savedData[dateKey] || [];
+    // Parse date correctly (YYYY-MM-DD format, add time to avoid timezone issues)
+    const [year, month, day] = dateKey.split('-');
+    const date = new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
+    newItems.forEach(newItem => {
+      const exists = oldItems.find(old => 
+        old.person === newItem.person && 
+        (old.text || null) === (newItem.text || null)
+      );
+      if (!exists) {
+        if (newItem.person === 'Note') {
+          added.push(`${date}: Note - "${newItem.text}"`);
+        } else {
+          added.push(`${date}: ${newItem.person}`);
+        }
+      }
+    });
+  });
+  
+  // Check for removals
+  Object.keys(savedData).forEach(dateKey => {
+    const oldItems = savedData[dateKey];
+    const newItems = sortedAssignments[dateKey] || [];
+    // Parse date correctly (YYYY-MM-DD format, add time to avoid timezone issues)
+    const [year, month, day] = dateKey.split('-');
+    const date = new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
+    oldItems.forEach(oldItem => {
+      const exists = newItems.find(newI => 
+        newI.person === oldItem.person && 
+        (newI.text || null) === (oldItem.text || null)
+      );
+      if (!exists) {
+        if (oldItem.person === 'Note') {
+          removed.push(`${date}: Note - "${oldItem.text}"`);
+        } else {
+          removed.push(`${date}: ${oldItem.person}`);
+        }
+      }
+    });
+  });
+  
+  const changesSummary = [];
+  if (added.length > 0) {
+    changesSummary.push('=== ADDED ===');
+    changesSummary.push(...added);
+  }
+  if (removed.length > 0) {
+    if (added.length > 0) changesSummary.push('');
+    changesSummary.push('=== REMOVED ===');
+    changesSummary.push(...removed);
+  }
+  if (added.length === 0 && removed.length === 0) {
+    changesSummary.push('No changes from last saved version');
+  }
+  
+  const totalChanges = added.length + removed.length;
+  
   try {
     const response = await fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
@@ -186,6 +265,8 @@ async function submitChangesToEmail() {
       body: JSON.stringify({
         submitter: submitterName,
         timestamp: new Date().toISOString(),
+        changesSummary: changesSummary.join('\n'),
+        totalChanges: totalChanges,
         calendarData: JSON.stringify(payload, null, 2)
       })
     });
