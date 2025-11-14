@@ -111,9 +111,16 @@ function updateNoteText(dateKey, oldText, newText) {
 ------------------------------ */
 async function saveAndPublish() {
   const customAssignments = loadCustomAssignments();
+  
+  // Sort assignments by date
+  const sortedAssignments = {};
+  Object.keys(customAssignments).sort().forEach(dateKey => {
+    sortedAssignments[dateKey] = customAssignments[dateKey];
+  });
+  
   const payload = {
     savedAt: new Date().toISOString(),
-    assignments: customAssignments
+    assignments: sortedAssignments
   };
   
   const dataStr = JSON.stringify(payload, null, 2);
@@ -199,9 +206,16 @@ async function saveAndPublish() {
 
 function exportCalendarData() {
   const customAssignments = loadCustomAssignments();
+  
+  // Sort assignments by date
+  const sortedAssignments = {};
+  Object.keys(customAssignments).sort().forEach(dateKey => {
+    sortedAssignments[dateKey] = customAssignments[dateKey];
+  });
+  
   const payload = {
     savedAt: new Date().toISOString(),
-    assignments: customAssignments
+    assignments: sortedAssignments
   };
   
   const dataStr = JSON.stringify(payload, null, 2);
@@ -928,7 +942,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prevBtn = document.getElementById("prev");
     const nextBtn = document.getElementById("next");
     const printBtn = document.getElementById("print");
-    const savePublishBtn = document.getElementById("save-publish");
     const exportBtn = document.getElementById("export-calendar");
     const kCheckbox = document.getElementById("k-toggle-checkbox");
     const kLabel = document.getElementById("k-toggle-label");
@@ -936,14 +949,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (prevBtn) prevBtn.addEventListener("click", goToPrev);
     if (nextBtn) nextBtn.addEventListener("click", goToNext);
     if (printBtn) printBtn.addEventListener("click", () => window.print());
-    
-    if (savePublishBtn) {
-      savePublishBtn.addEventListener("click", async () => {
-        if (confirm('Save & Publish calendar?\n\nThis will save calendar-data.json and help you commit to GitHub.')) {
-          await saveAndPublish();
-        }
-      });
-    }
     
     if (exportBtn) {
       exportBtn.addEventListener("click", () => {
