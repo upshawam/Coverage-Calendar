@@ -386,33 +386,43 @@ async function saveAndPublish() {
   }
 }
 
-function exportCalendarData() {
+
+function getCurrentCalendarJson() {
   const customAssignments = loadCustomAssignments();
-  
   // Sort assignments by date
   const sortedAssignments = {};
   Object.keys(customAssignments).sort().forEach(dateKey => {
     sortedAssignments[dateKey] = customAssignments[dateKey];
   });
-  
   const payload = {
     savedAt: new Date().toISOString(),
     assignments: sortedAssignments
   };
-  
-  const dataStr = JSON.stringify(payload, null, 2);
-  const blob = new Blob([dataStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'calendar-data.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  showSuccessBanner('Calendar exported! Drag to your repo folder and commit.');
+  return JSON.stringify(payload, null, 2);
 }
+
+
+// exportCalendarData removed (clipboard replaces export)
+
+// Clipboard copy logic
+function copyCalendarJsonToClipboard() {
+  const dataStr = getCurrentCalendarJson();
+  navigator.clipboard.writeText(dataStr)
+    .then(() => {
+      showSuccessBanner('Calendar JSON copied to clipboard!');
+    })
+    .catch(err => {
+      showErrorBanner('Failed to copy: ' + err, null);
+    });
+}
+
+// Wire up button after DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  const copyBtn = document.getElementById('copy-calendar');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', copyCalendarJsonToClipboard);
+  }
+});
 
 async function loadCalendarData() {
   try {
