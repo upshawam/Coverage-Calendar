@@ -5,10 +5,16 @@ function showSuccessBanner(message) {
   errorBanner.style.display = "";
   errorBanner.setAttribute('aria-hidden', 'false');
   errorBanner.classList.add('success');
+  // Hide retry/dismiss buttons for success
+  if (typeof errorRetryBtn !== 'undefined' && errorRetryBtn) errorRetryBtn.style.display = 'none';
+  if (typeof errorDismissBtn !== 'undefined' && errorDismissBtn) errorDismissBtn.style.display = 'none';
   setTimeout(() => {
     errorBanner.style.display = "none";
     errorBanner.setAttribute('aria-hidden', 'true');
     errorBanner.classList.remove('success');
+    // Restore buttons for future errors
+    if (typeof errorRetryBtn !== 'undefined' && errorRetryBtn) errorRetryBtn.style.display = '';
+    if (typeof errorDismissBtn !== 'undefined' && errorDismissBtn) errorDismissBtn.style.display = '';
   }, 2000);
 }
 /* Full index.js — calendar rendering + K Work/Off toggle
