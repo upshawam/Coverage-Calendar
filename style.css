@@ -1,3 +1,9 @@
+/* Success banner style for showSuccessBanner */
+.error-banner.success {
+  background: #2ecc40;
+  color: #fff;
+  border: 1px solid #27ae60;
+}
 /* ========================================================================== */
 /*                                   Global                                   */
 /* ========================================================================== */

@@ -1,3 +1,16 @@
+// Show a green success banner (like showErrorBanner, but for success)
+function showSuccessBanner(message) {
+  if (!errorBanner) return;
+  errorBannerText.textContent = message || "Success.";
+  errorBanner.style.display = "";
+  errorBanner.setAttribute('aria-hidden', 'false');
+  errorBanner.classList.add('success');
+  setTimeout(() => {
+    errorBanner.style.display = "none";
+    errorBanner.setAttribute('aria-hidden', 'true');
+    errorBanner.classList.remove('success');
+  }, 2000);
+}
 /* Full index.js — calendar rendering + K Work/Off toggle
    Changes in this version:
    - Replaced window.prompt note entry with inline textarea in the day-menu
