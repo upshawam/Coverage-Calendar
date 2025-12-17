@@ -1,5 +1,5 @@
 {
-  "savedAt": "2025-12-01T18:08:02.152Z",
+  "savedAt": "2025-12-17T04:58:23.363Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -177,18 +177,34 @@
       {
         "person": "Sophia",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2025-12-19": [
       {
         "person": "Sophia",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "A- Work Party"
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2025-12-22": [
       {
         "person": "Sophia",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2025-12-23": [
@@ -201,6 +217,10 @@
       {
         "person": "Nonnie",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2025-12-29": [
@@ -213,15 +233,45 @@
       {
         "person": "Nonnie",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2025-12-31": [
       {
         "person": "Sophia",
         "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
       }
     ],
     "2026-01-02": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-05": [
+      {
+        "person": "Note",
+        "text": "Aaron Study"
+      }
+    ],
+    "2026-01-06": [
+      {
+        "person": "Sophia",
+        "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
+      }
+    ],
+    "2026-01-07": [
       {
         "person": "Sophia",
         "text": null
@@ -233,9 +283,47 @@
         "text": null
       }
     ],
+    "2026-01-09": [
+      {
+        "person": "Sophia",
+        "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
+      }
+    ],
+    "2026-01-12": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-01-13": [
       {
         "person": "Nonnie",
+        "text": null
+      },
+      {
+        "person": "Note",
+        "text": "Aaron Study"
+      }
+    ],
+    "2026-01-14": [
+      {
+        "person": "Note",
+        "text": "Aaron - Kids"
+      }
+    ],
+    "2026-01-15": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-16": [
+      {
+        "person": "Sophia",
         "text": null
       }
     ],
@@ -245,9 +333,57 @@
         "text": null
       }
     ],
+    "2026-01-20": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-21": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-22": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-23": [
+      {
+        "person": "Note",
+        "text": "Aaron - Kids"
+      }
+    ],
+    "2026-01-25": [
+      {
+        "person": "Note",
+        "text": "Aaron - Kids"
+      }
+    ],
+    "2026-01-26": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-01-28": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-01-29": [
       {
         "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-01-30": [
+      {
+        "person": "Sophia",
         "text": null
       }
     ]
