@@ -1,5 +1,5 @@
 {
-  "savedAt": "2025-12-17T04:58:23.363Z",
+  "savedAt": "2025-12-22T02:12:13.860Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -293,12 +293,6 @@
         "text": "Aaron Study"
       }
     ],
-    "2026-01-12": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
     "2026-01-13": [
       {
         "person": "Nonnie",
@@ -311,8 +305,8 @@
     ],
     "2026-01-14": [
       {
-        "person": "Note",
-        "text": "Aaron - Kids"
+        "person": "Sophia",
+        "text": null
       }
     ],
     "2026-01-15": [
@@ -339,12 +333,6 @@
         "text": null
       }
     ],
-    "2026-01-21": [
-      {
-        "person": "Sophia",
-        "text": null
-      }
-    ],
     "2026-01-22": [
       {
         "person": "Sophia",
@@ -353,8 +341,8 @@
     ],
     "2026-01-23": [
       {
-        "person": "Note",
-        "text": "Aaron - Kids"
+        "person": "Sophia",
+        "text": null
       }
     ],
     "2026-01-25": [
@@ -369,6 +357,12 @@
         "text": null
       }
     ],
+    "2026-01-27": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-01-28": [
       {
         "person": "Sophia",
@@ -378,12 +372,6 @@
     "2026-01-29": [
       {
         "person": "Nonnie",
-        "text": null
-      }
-    ],
-    "2026-01-30": [
-      {
-        "person": "Sophia",
         "text": null
       }
     ]
