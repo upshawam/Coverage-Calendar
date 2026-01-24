@@ -1,5 +1,5 @@
 {
-  "savedAt": "2025-12-22T02:12:13.860Z",
+  "savedAt": "2026-01-24T02:27:07.814Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -372,6 +372,126 @@
     "2026-01-29": [
       {
         "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-02-01": [
+      {
+        "person": "Note",
+        "text": "February"
+      }
+    ],
+    "2026-02-02": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-03": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-02-04": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-05": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-09": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-10": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-11": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-02-13": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-16": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-17": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-02-18": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-19": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-25": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-02-26": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-02-27": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-03-03": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-03-04": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-03-05": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-03-06": [
+      {
+        "person": "Sophia",
         "text": null
       }
     ]
