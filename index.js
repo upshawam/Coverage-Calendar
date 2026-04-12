@@ -509,7 +509,6 @@ function hideErrorBanner() {
 
 /* Helper to init fetch & build for retry use */
 async function initFetchAndBuild() {
-  if (overlay) overlay.style.display = "block";
   try {
     const data = await fetchShiftData();
     buildCalendar(currentYear, currentMonth, data || {});
@@ -1202,7 +1201,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       errorDismissBtn.addEventListener('click', () => hideErrorBanner());
     }
 
-    if (overlay) overlay.style.display = "block";
     try {
       // Load saved calendar data first
       await loadCalendarData();
