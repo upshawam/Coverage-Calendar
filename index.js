@@ -565,6 +565,7 @@ function isKristinWorkingCategory(cat) {
   if (!cat) return false;
   const c = String(cat).toLowerCase();
   return c.indexOf("k-work") !== -1 ||
+         c.indexOf("k-ot") !== -1 ||
          c.indexOf("k-weekend") !== -1 ||
          c.indexOf("k-nora") !== -1 ||
          c.indexOf("k-neuro") !== -1 ||
