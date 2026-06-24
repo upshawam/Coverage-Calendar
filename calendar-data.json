@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-24T15:04:06.132Z",
+  "savedAt": "2026-06-24T15:21:27.812Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -894,7 +894,7 @@
     "2026-07-08": [
       {
         "person": "Note",
-        "text": "A-kids"
+        "text": "A-Kids"
       }
     ],
     "2026-07-09": [
@@ -929,24 +929,32 @@
     ],
     "2026-07-16": [
       {
-        "person": "Sophia",
-        "text": null
+        "person": "Note",
+        "text": "Canada"
       }
     ],
     "2026-07-17": [
       {
         "person": "Note",
-        "text": "both off"
+        "text": "Canada"
+      }
+    ],
+    "2026-07-18": [
+      {
+        "person": "Note",
+        "text": "Canada"
+      }
+    ],
+    "2026-07-19": [
+      {
+        "person": "Note",
+        "text": "Canada"
       }
     ],
     "2026-07-20": [
       {
-        "person": "Sophia",
-        "text": null
-      },
-      {
         "person": "Note",
-        "text": "both off"
+        "text": "Canada"
       }
     ],
     "2026-07-21": [
@@ -965,16 +973,20 @@
       {
         "person": "Note",
         "text": "both off"
+      },
+      {
+        "person": "Sophia",
+        "text": null
       }
     ],
     "2026-07-24": [
       {
-        "person": "Sophia",
-        "text": null
-      },
-      {
         "person": "Note",
         "text": "both off"
+      },
+      {
+        "person": "Sophia",
+        "text": null
       }
     ],
     "2026-07-27": [
@@ -991,7 +1003,7 @@
     ],
     "2026-07-29": [
       {
-        "person": "Nonnie",
+        "person": "Sophia",
         "text": null
       }
     ],
@@ -1007,8 +1019,8 @@
     ],
     "2026-07-31": [
       {
-        "person": "Sophia",
-        "text": null
+        "person": "Note",
+        "text": "A-Kids"
       }
     ]
   }
