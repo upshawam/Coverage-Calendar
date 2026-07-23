@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-07-23T13:50:46.632Z",
+  "savedAt": "2026-07-23T19:53:04.624Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -1027,6 +1027,12 @@
         "text": null
       }
     ],
+    "2026-08-07": [
+      {
+        "person": "Note",
+        "text": "Kristin Derm"
+      }
+    ],
     "2026-08-12": [
       {
         "person": "Nonnie",
@@ -1063,8 +1069,7 @@
         "text": null
       }
     ]
-  }
-  ,
+  },
   "schoolHolidays": {
     "2026-09-07": "Labor Day (School Closed)",
     "2026-10-05": "Fall Break (Closed)",
