@@ -194,6 +194,13 @@ async function submitChangesToEmail() {
     savedAt: new Date().toISOString(),
     assignments: sortedAssignments
   };
+  // include schoolHolidays from localStorage so submit includes them
+  try {
+    const rawH = localStorage.getItem('schoolHolidays');
+    if (rawH) payload.schoolHolidays = JSON.parse(rawH);
+  } catch (e) {
+    // ignore
+  }
   
   // Compare with last saved version to show only changes
   let savedData = {};
@@ -323,6 +330,14 @@ async function saveAndPublish() {
     savedAt: new Date().toISOString(),
     assignments: sortedAssignments
   };
+
+  // include hardcoded schoolHolidays so save/download preserves them
+  try {
+    const raw = localStorage.getItem('schoolHolidays');
+    if (raw) payload.schoolHolidays = JSON.parse(raw);
+  } catch (e) {
+    // ignore
+  }
   
   const dataStr = JSON.stringify(payload, null, 2);
   
@@ -417,6 +432,13 @@ function getCurrentCalendarJson() {
     savedAt: new Date().toISOString(),
     assignments: sortedAssignments
   };
+  // include any hardcoded schoolHolidays so copy/download preserves them
+  try {
+    const raw = localStorage.getItem('schoolHolidays');
+    if (raw) payload.schoolHolidays = JSON.parse(raw);
+  } catch (e) {
+    // ignore
+  }
   return JSON.stringify(payload, null, 2);
 }
 
