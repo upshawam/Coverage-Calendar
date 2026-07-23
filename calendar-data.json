@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-06-24T15:21:27.812Z",
+  "savedAt": "2026-07-23T13:50:46.632Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -893,12 +893,6 @@
     ],
     "2026-07-08": [
       {
-        "person": "Note",
-        "text": "A-Kids"
-      }
-    ],
-    "2026-07-09": [
-      {
         "person": "Sophia",
         "text": null
       }
@@ -1003,7 +997,7 @@
     ],
     "2026-07-29": [
       {
-        "person": "Sophia",
+        "person": "Nonnie",
         "text": null
       }
     ],
@@ -1021,6 +1015,52 @@
       {
         "person": "Note",
         "text": "A-Kids"
+      },
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-06": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-08-12": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-08-20": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-08-26": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-09-02": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-09-09": [
+      {
+        "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-09-15": [
+      {
+        "person": "Nonnie",
+        "text": null
       }
     ]
   }
