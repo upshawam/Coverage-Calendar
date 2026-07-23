@@ -452,8 +452,29 @@ async function loadCalendarData() {
     }
     
     const data = await res.json();
+    // Load assignments if present
     if (data.assignments) {
       saveCustomAssignments(data.assignments);
+    }
+
+    // Load optional shiftData (small labels like A/K or school events)
+    if (data.shiftData) {
+      try {
+        localStorage.setItem("shiftData", JSON.stringify(data.shiftData));
+      } catch (e) {
+        console.warn('Failed to save shiftData to localStorage:', e);
+      }
+    }
+    // Load optional schoolHolidays (rendered like built-in holidays)
+    if (data.schoolHolidays) {
+      try {
+        localStorage.setItem("schoolHolidays", JSON.stringify(data.schoolHolidays));
+      } catch (e) {
+        console.warn('Failed to save schoolHolidays to localStorage:', e);
+      }
+    }
+
+    if (data.assignments) {
       const savedDate = data.savedAt ? new Date(data.savedAt).toLocaleString() : 'unknown';
       console.log('Calendar loaded from calendar-data.json:', savedDate);
       return data;
@@ -796,6 +817,16 @@ function buildCalendar(year, month, shiftData) {
   const firstDay = getWeekday(year, month, 1);
   const daysInPrevMonth = daysInMonth(year, month - 1);
   const holidays = getUSHolidays(year);
+  // Merge any school-specific holidays saved from calendar-data.json
+  try {
+    const raw = localStorage.getItem('schoolHolidays');
+    if (raw) {
+      const schoolHols = JSON.parse(raw);
+      Object.keys(schoolHols).forEach(k => { holidays[k] = schoolHols[k]; });
+    }
+  } catch (e) {
+    // ignore parsing errors
+  }
   const cellMap = new Map();
 
   // prev month filler
@@ -1202,11 +1233,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      // Load saved calendar data first
-      await loadCalendarData();
-      
-      const data = await fetchShiftData();
-      buildCalendar(currentYear, currentMonth, data || {});
+      // Load saved calendar data first (may include assignments and shiftData)
+      const loaded = await loadCalendarData();
+
+      // Prefer shiftData from calendar-data.json when present (useful for local testing)
+      let shiftDataForBuild = {};
+      if (loaded && loaded.shiftData) shiftDataForBuild = loaded.shiftData;
+
+      // Try fetching remote shift data; if it returns non-empty, prefer it, otherwise keep local file data
+      try {
+        const fetched = await fetchShiftData();
+        if (fetched && Object.keys(fetched).length > 0) {
+          shiftDataForBuild = fetched;
+        }
+      } catch (e) {
+        // ignore fetch errors and fall back to file-local shiftData
+      }
+
+      buildCalendar(currentYear, currentMonth, shiftDataForBuild || {});
     } catch (err) {
       console.error("Initialization error:", err);
       buildCalendar(currentYear, currentMonth, JSON.parse(localStorage.getItem("shiftData") || "{}"));
