@@ -1,5 +1,5 @@
 {
-  "savedAt": "2026-07-23T19:53:04.624Z",
+  "savedAt": "2026-07-24T02:03:01.242Z",
   "assignments": {
     "2025-11-04": [
       {
@@ -1021,6 +1021,18 @@
         "text": null
       }
     ],
+    "2026-08-04": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-05": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-08-06": [
       {
         "person": "Nonnie",
@@ -1031,11 +1043,45 @@
       {
         "person": "Note",
         "text": "Kristin Derm"
+      },
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-10": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-11": [
+      {
+        "person": "Sophia",
+        "text": null
       }
     ],
     "2026-08-12": [
       {
         "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-08-14": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-18": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-19": [
+      {
+        "person": "Sophia",
         "text": null
       }
     ],
@@ -1045,15 +1091,57 @@
         "text": null
       }
     ],
+    "2026-08-21": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-25": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-08-26": [
       {
         "person": "Nonnie",
         "text": null
       }
     ],
+    "2026-08-27": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-28": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-08-31": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
+    "2026-09-01": [
+      {
+        "person": "Sophia",
+        "text": null
+      }
+    ],
     "2026-09-02": [
       {
         "person": "Nonnie",
+        "text": null
+      }
+    ],
+    "2026-09-03": [
+      {
+        "person": "Sophia",
         "text": null
       }
     ],
