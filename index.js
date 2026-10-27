@@ -125,6 +125,25 @@ function updateNoteText(dateKey, oldText, newText) {
   }
 }
 
+function mergeShiftData(remoteShiftData, importedShiftData) {
+  const merged = { ...(remoteShiftData || {}) };
+  const importedEntries = Object.entries(importedShiftData || {});
+  Object.keys(merged).forEach(dateKey => {
+    merged[dateKey] = (merged[dateKey] || []).filter(entry => !entry.person || entry.person.toLowerCase() !== "aaron");
+    if (merged[dateKey].length === 0) delete merged[dateKey];
+  });
+
+  importedEntries.forEach(([dateKey, entries]) => {
+    const existing = merged[dateKey] || [];
+    const additions = (Array.isArray(entries) ? entries : []).filter(entry =>
+      !existing.some(current => current.person === entry.person && current.category === entry.category)
+    );
+    if (existing.length > 0 || additions.length > 0) merged[dateKey] = [...existing, ...additions];
+  });
+
+  return merged;
+}
+
 /* -----------------------------
    Export/Load Calendar Data
 ------------------------------ */
@@ -482,7 +501,9 @@ async function loadCalendarData() {
     // Load optional shiftData (small labels like A/K or school events)
     if (data.shiftData) {
       try {
-        localStorage.setItem("shiftData", JSON.stringify(data.shiftData));
+        localStorage.setItem("importedShiftData", JSON.stringify(data.shiftData));
+        const cachedShiftData = JSON.parse(localStorage.getItem("shiftData") || "{}");
+        localStorage.setItem("shiftData", JSON.stringify(mergeShiftData(cachedShiftData, data.shiftData)));
       } catch (e) {
         console.warn('Failed to save shiftData to localStorage:', e);
       }
@@ -516,9 +537,11 @@ async function fetchShiftData() {
     const res = await fetch(SHEETS_URL + "?ts=" + Date.now(), { cache: "no-store" });
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
     const data = await res.json();
-    localStorage.setItem("shiftData", JSON.stringify(data || {}));
+    const importedShiftData = JSON.parse(localStorage.getItem("importedShiftData") || "{}");
+    const mergedData = mergeShiftData(data || {}, importedShiftData);
+    localStorage.setItem("shiftData", JSON.stringify(mergedData));
     hideErrorBanner();
-    return data || {};
+    return mergedData;
   } catch (err) {
     console.error("Error fetching shift data:", err);
     showErrorBanner("Unable to refresh shifts — showing cached data.", () => {
