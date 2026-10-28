@@ -867,7 +867,13 @@ function buildCalendar(year, month, shiftData) {
     const raw = localStorage.getItem('schoolHolidays');
     if (raw) {
       const schoolHols = JSON.parse(raw);
-      Object.keys(schoolHols).forEach(k => { holidays[k] = schoolHols[k]; });
+      Object.keys(schoolHols).forEach(k => {
+        const nationalHoliday = holidays[k];
+        const schoolHoliday = schoolHols[k];
+        holidays[k] = nationalHoliday && nationalHoliday !== schoolHoliday
+          ? `${nationalHoliday} / ${schoolHoliday}`
+          : schoolHoliday;
+      });
     }
   } catch (e) {
     // ignore parsing errors
