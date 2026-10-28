@@ -1481,5 +1481,1453 @@
     "2027-03-26": "Spring Break (Closed)",
     "2027-04-26": "Teacher Workday (Closed)",
     "2027-05-27": "Last Day / School Out"
+  },
+  "shiftData": {
+    "2027-07-13": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-05": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-13": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-13": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-31": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-17": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-17": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-05": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-31": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-31": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-20": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-17": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-05": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-08": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-12": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-05": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-27": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-03": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-29": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-23": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-25": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-13": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-19": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-30": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-17": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-26": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-05-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-02-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-09-04": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-09": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-15": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-03-31": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-18": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-13": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-09-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-05-14": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-04-21": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-07-28": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-24": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-12-01": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-06-16": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-10-17": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-01-10": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-08-02": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-11-07": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-07-05": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-22": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2027-08-06": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ],
+    "2026-06-11": [
+      {
+        "person": "Aaron",
+        "category": "A-Work"
+      }
+    ]
   }
 }

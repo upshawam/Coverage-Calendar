@@ -70,6 +70,10 @@ function loadCustomAssignments() {
   try { return JSON.parse(localStorage.getItem("customAssignments") || "{}"); }
   catch (e) { return {}; }
 }
+function loadImportedShiftData() {
+  try { return JSON.parse(localStorage.getItem("importedShiftData") || "{}"); }
+  catch (e) { return {}; }
+}
 function saveCustomAssignments(assignments) { localStorage.setItem("customAssignments", JSON.stringify(assignments)); }
 function addAssignmentToStorage(dateKey, person, text = null) {
   const custom = loadCustomAssignments();
@@ -211,7 +215,8 @@ async function submitChangesToEmail() {
   
   const payload = {
     savedAt: new Date().toISOString(),
-    assignments: sortedAssignments
+    assignments: sortedAssignments,
+    shiftData: loadImportedShiftData()
   };
   // include schoolHolidays from localStorage so submit includes them
   try {
@@ -347,7 +352,8 @@ async function saveAndPublish() {
   
   const payload = {
     savedAt: new Date().toISOString(),
-    assignments: sortedAssignments
+    assignments: sortedAssignments,
+    shiftData: loadImportedShiftData()
   };
 
   // include hardcoded schoolHolidays so save/download preserves them
@@ -449,7 +455,8 @@ function getCurrentCalendarJson() {
   });
   const payload = {
     savedAt: new Date().toISOString(),
-    assignments: sortedAssignments
+    assignments: sortedAssignments,
+    shiftData: loadImportedShiftData()
   };
   // include any hardcoded schoolHolidays so copy/download preserves them
   try {
