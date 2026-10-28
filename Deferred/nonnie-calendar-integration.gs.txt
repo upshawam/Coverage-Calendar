@@ -1,0 +1,41 @@
+function appendNonnieAvailability(shiftData) {
+  var calendarId = PropertiesService.getScriptProperties().getProperty('NONNIE_CALENDAR_ID');
+  if (!calendarId) throw new Error('Set the NONNIE_CALENDAR_ID script property.');
+
+  var calendar = CalendarApp.getCalendarById(calendarId);
+  if (!calendar) throw new Error('Calendar not found or not shared with the script owner.');
+
+  var timeZone = calendar.getTimeZone();
+  var now = new Date();
+  var rangeStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var rangeEnd = new Date(now.getFullYear(), now.getMonth() + 13, 1);
+  var events = calendar.getEvents(rangeStart, rangeEnd);
+
+  Object.keys(shiftData).forEach(function(dateKey) {
+    shiftData[dateKey] = shiftData[dateKey].filter(function(entry) {
+      return !(entry.person === 'Nonnie' && entry.category === 'N-Available');
+    });
+    if (shiftData[dateKey].length === 0) delete shiftData[dateKey];
+  });
+
+  events.forEach(function(event) {
+    if (!event.isAllDayEvent() || event.getTitle().trim().toLowerCase() !== 'available') return;
+
+    var startKey = Utilities.formatDate(event.getAllDayStartDate(), timeZone, 'yyyy-MM-dd');
+    var endKey = Utilities.formatDate(event.getAllDayEndDate(), timeZone, 'yyyy-MM-dd');
+
+    for (var dateKey = startKey; dateKey < endKey; dateKey = nextNonnieDateKey(dateKey)) {
+      if (!shiftData[dateKey]) shiftData[dateKey] = [];
+      var alreadyAdded = shiftData[dateKey].some(function(entry) {
+        return entry.person === 'Nonnie' && entry.category === 'N-Available';
+      });
+      if (!alreadyAdded) shiftData[dateKey].push({ person: 'Nonnie', category: 'N-Available' });
+    }
+  });
+}
+
+function nextNonnieDateKey(dateKey) {
+  var parts = dateKey.split('-').map(Number);
+  var date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2] + 1));
+  return Utilities.formatDate(date, 'UTC', 'yyyy-MM-dd');
+}
