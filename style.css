@@ -228,6 +228,15 @@ body {
 .day-number { font-weight: 700; font-size: 0.95em; }
 .day.weekend { background: #eef6ff; }
 
+.holiday-label {
+  margin-top: 4px;
+  font-size: 0.68em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.holiday-label.national-holiday { color: #1558a6; font-weight: 700; }
+.holiday-label.school-holiday { color: #39704a; }
+
 /* subdued add button */
 .add-btn {
   position: absolute;

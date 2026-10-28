@@ -862,22 +862,28 @@ function buildCalendar(year, month, shiftData) {
   const firstDay = getWeekday(year, month, 1);
   const daysInPrevMonth = daysInMonth(year, month - 1);
   const holidays = getUSHolidays(year);
+  let schoolHolidays = {};
   // Merge any school-specific holidays saved from calendar-data.json
   try {
     const raw = localStorage.getItem('schoolHolidays');
-    if (raw) {
-      const schoolHols = JSON.parse(raw);
-      Object.keys(schoolHols).forEach(k => {
-        const nationalHoliday = holidays[k];
-        const schoolHoliday = schoolHols[k];
-        holidays[k] = nationalHoliday && nationalHoliday !== schoolHoliday
-          ? `${nationalHoliday} / ${schoolHoliday}`
-          : schoolHoliday;
-      });
-    }
+    if (raw) schoolHolidays = JSON.parse(raw);
   } catch (e) {
     // ignore parsing errors
   }
+  const renderHolidayLabels = (cell, dateKey) => {
+    if (holidays[dateKey]) {
+      const holidayEl = document.createElement("div");
+      holidayEl.className = "holiday-label national-holiday";
+      holidayEl.textContent = holidays[dateKey];
+      cell.appendChild(holidayEl);
+    }
+    if (schoolHolidays[dateKey]) {
+      const holidayEl = document.createElement("div");
+      holidayEl.className = "holiday-label school-holiday";
+      holidayEl.textContent = schoolHolidays[dateKey];
+      cell.appendChild(holidayEl);
+    }
+  };
   const cellMap = new Map();
 
   // prev month filler
@@ -905,13 +911,7 @@ function buildCalendar(year, month, shiftData) {
     // render imported shifts (A/K etc.) for carryover day
     renderShiftLabelsForCell(cell, prevDateKey, shiftData);
 
-    // holiday if present
-    if (holidays[prevDateKey]) {
-      const holidayEl = document.createElement("div");
-      holidayEl.className = "holiday-label";
-      holidayEl.textContent = holidays[prevDateKey];
-      cell.appendChild(holidayEl);
-    }
+    renderHolidayLabels(cell, prevDateKey);
 
     calendarEl.appendChild(cell);
   }
@@ -940,13 +940,7 @@ function buildCalendar(year, month, shiftData) {
     // render imported shifts into the cell
     renderShiftLabelsForCell(cell, dateKey, shiftData);
 
-    // holiday
-    if (holidays[dateKey]) {
-      const holidayEl = document.createElement("div");
-      holidayEl.className = "holiday-label";
-      holidayEl.textContent = holidays[dateKey];
-      cell.appendChild(holidayEl);
-    }
+    renderHolidayLabels(cell, dateKey);
 
     calendarEl.appendChild(cell);
   }
@@ -977,13 +971,7 @@ function buildCalendar(year, month, shiftData) {
     // render imported shifts for carryover day
     renderShiftLabelsForCell(cell, nextDateKey, shiftData);
 
-    // holiday if present
-    if (holidays[nextDateKey]) {
-      const holidayEl = document.createElement("div");
-      holidayEl.className = "holiday-label";
-      holidayEl.textContent = holidays[nextDateKey];
-      cell.appendChild(holidayEl);
-    }
+    renderHolidayLabels(cell, nextDateKey);
 
     calendarEl.appendChild(cell);
   }
